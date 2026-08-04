@@ -1,4 +1,6 @@
-const STORAGE_KEY='salescost-pro-v6';
+const STORAGE_KEY='salescost-pro-v7-role-actions';
+const CURRENT_USER='Trần Diệu Hương';
+const CURRENT_ROLE='Quản trị viên';
 const navItems=[
  ['dashboard','▦','Tổng quan'],['master','◫','Dữ liệu gốc'],['expenses','💳','Chi phí'],['registrations','⇄','Quy trình'],['documents','📁','Tài liệu'],['reports','📊','Báo cáo'],['settings','⚙','Cấu hình']
 ];
@@ -90,14 +92,34 @@ function discounts(){return table(['Chính sách','Đối tượng','Điều ki�
 function programs(){return table(['Chương trình','Loại','Phụ trách','Thời gian','Ngân sách','Trạng thái'],state.programs.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.type}</td><td>${x.owner}</td><td>${x.period}</td><td><b>${money(x.budget)}</b></td><td>${badge(x.status)}</td></tr>`))}
 function budget(){const annualPlanned=state.budgets.reduce((s,x)=>s+x.planned,0),annualApproved=state.budgets.reduce((s,x)=>s+x.approved,0),annualUsed=state.budgets.reduce((s,x)=>s+x.used,0);const max=Math.max(...state.monthlyBudgets.map(x=>x.approved),1);return summary([['Kế hoạch năm',money(annualPlanned)],['Đã đăng ký',money(annualApproved)],['Đã sử dụng',money(annualUsed)],['Còn lại',money(annualApproved-annualUsed)]])+`<div class="panel monthly-panel"><div class="panel-head"><div><h3>Ngân sách theo tháng</h3><p>So sánh ngân sách được đăng ký và số tiền đã sử dụng trong năm 2026</p></div><button class="btn primary" onclick="openMonthlyBudgetModal()">＋ Thêm ngân sách tháng</button></div><div class="monthly-chart">${state.monthlyBudgets.map(x=>{const approved=Math.round(x.approved/max*100),used=Math.round(x.used/max*100);return `<div class="month-col"><div class="month-values"><span>${Math.round(x.approved/1000000)}</span><b>${x.used?Math.round(x.used/1000000):0}</b></div><div class="month-bars"><i style="height:${approved}%"></i><em style="height:${used}%"></em></div><small>T${x.month}</small></div>`}).join('')}</div><div class="chart-key"><span><i class="approved-key"></i>Ngân sách đăng ký</span><span><i class="used-key"></i>Đã sử dụng</span><small>Đơn vị: triệu đồng</small></div></div>`+table(['Tháng','Kế hoạch','Đăng ký','Đã sử dụng','Còn lại','Tỷ lệ sử dụng','Trạng thái',''],state.monthlyBudgets.map(x=>{const remain=x.approved-x.used,rate=x.approved?Math.round(x.used/x.approved*100):0;return `<tr><td><b>Tháng ${x.month}/${x.year}</b><span>${x.id}</span></td><td>${money(x.planned)}</td><td><b>${money(x.approved)}</b></td><td>${money(x.used)}</td><td><b>${money(remain)}</b></td><td><div class="usage"><div><i style="width:${Math.min(rate,100)}%"></i></div><b>${rate}%</b></div></td><td>${badge(x.status)}</td><td><button class="link-btn danger" onclick="removeItem('monthlyBudgets','${x.id}')">Xóa</button></td></tr>`})) + `<div class="section-gap"></div>` + `<h3 class="section-title">Ngân sách theo khu vực</h3>` + table(['Ngân sách','Bộ phận','Kế hoạch','Đăng ký','Đã sử dụng','Còn lại'],state.budgets.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.owner}</td><td>${money(x.planned)}</td><td><b>${money(x.approved)}</b></td><td>${money(x.used)}</td><td><b>${money(x.approved-x.used)}</b></td></tr>`))}
 function expenses(){return summary([['Chờ đăng ký',money(state.expenses.filter(x=>x.status.includes('Chờ đăng ký')).reduce((s,x)=>s+x.amount,0))],['Đã đăng ký',money(state.expenses.filter(x=>x.status.includes('Đã đăng ký')).reduce((s,x)=>s+x.amount,0))],['Chờ thanh toán',money(state.expenses.filter(x=>x.status.includes('Chờ thanh toán')).reduce((s,x)=>s+x.amount,0))],['Đã thanh toán',money(state.expenses.filter(x=>x.status.includes('Đã thanh toán')).reduce((s,x)=>s+x.amount,0))]])+table(['Khoản chi phí','Chương trình/chính sách','Bộ phận','Số tiền','Trạng thái',''],state.expenses.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td><b>${x.ref}</b></td><td>${x.department}</td><td><b>${money(x.amount)}</b>${isBudget?`<span>Đã dùng: ${money(x.usedAmount||0)}</span>`:''}</td><td>${badge(x.status)}${x.completionReason?`<span>${x.completionReason}</span>`:''}</td><td><button class="link-btn danger" onclick="removeItem('expenses','${x.id}')">Xóa</button></td></tr>`))}
-function processActionLabel(x){
- if(x.status==='Chờ phê duyệt') return (x.approvalStep||0)===0?'Trưởng bộ phận phê duyệt':'Tài vụ phê duyệt';
- if(['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)){
-  const map={'Tạo mới':'Gửi phê duyệt','Đang thực hiện':'Ghi nhận đã sử dụng hết'};
-  return map[x.status]||'';
+function isBudgetProcess(x){return ['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)}
+function nextApprover(x){return (x.approvalStep||0)===0?x.managerApprover:x.financeApprover}
+function canAdminAct(){return CURRENT_ROLE==='Quản trị viên'}
+function processActions(x){
+ const owner=x.requester===CURRENT_USER||canAdminAct();
+ const approver=nextApprover(x)===CURRENT_USER||canAdminAct();
+ if(x.status==='Tạo mới'&&owner){
+  return `<div class="action-group owner-actions"><button class="action-btn subtle" onclick="editProcess('${x.id}')">Điều chỉnh</button><button class="action-btn danger" onclick="deleteProcess('${x.id}')">Xóa</button><button class="action-btn primary" onclick="submitProcess('${x.id}')">Nộp đơn</button></div>`;
  }
- const map={'Tạo mới':'Gửi phê duyệt','Đã phê duyệt':'Bắt đầu thực hiện','Đang thực hiện':'Đã sử dụng hết chi phí','Chờ bổ sung tài liệu':'Xác nhận đủ tài liệu'};
- return map[x.status]||'';
+ if(x.status==='Hoàn trả'&&owner){
+  return `<div class="action-group owner-actions"><button class="action-btn subtle" onclick="editProcess('${x.id}')">Điều chỉnh</button><button class="action-btn danger" onclick="deleteProcess('${x.id}')">Xóa</button><button class="action-btn primary" onclick="submitProcess('${x.id}')">Nộp lại</button></div>`;
+ }
+ if(x.status==='Chờ phê duyệt'&&approver){
+  return `<div class="action-group approver-actions"><button class="action-btn danger" onclick="rejectProcess('${x.id}')">Từ chối</button><button class="action-btn warning" onclick="returnProcess('${x.id}')">Hoàn trả</button><button class="action-btn primary" onclick="approveProcess('${x.id}')">Phê duyệt</button></div>`;
+ }
+ if(isBudgetProcess(x)&&x.status==='Đang thực hiện'&&owner){
+  return `<button class="action-btn primary" onclick="finishBudget('${x.id}')">Ghi nhận đã sử dụng hết</button>`;
+ }
+ if(!isBudgetProcess(x)&&x.status==='Đã phê duyệt'&&owner){
+  return `<button class="action-btn primary" onclick="advanceProcess('${x.id}')">Bắt đầu thực hiện</button>`;
+ }
+ if(!isBudgetProcess(x)&&x.status==='Đang thực hiện'&&owner){
+  return `<button class="action-btn primary" onclick="advanceProcess('${x.id}')">Đã sử dụng hết chi phí</button>`;
+ }
+ if(!isBudgetProcess(x)&&x.status==='Chờ bổ sung tài liệu'&&owner){
+  return `<button class="action-btn primary" onclick="advanceProcess('${x.id}')">Xác nhận đủ tài liệu</button>`;
+ }
+ return '<span class="muted">—</span>';
 }
 function approvalTimeline(x){
  const step=x.approvalStep||0;
@@ -131,29 +153,39 @@ function categoryBudgetRemaining(x){return Math.max(0,Number(x.approved||0)-Numb
 function eligibleBudgets(type){return state.categoryBudgets.filter(x=>x.category===type&&categoryBudgetRemaining(x)>0&&x.status!=='Đã chốt')}
 function categoryBudgetTable(){return `<div class="panel table-wrap category-budget-table"><div class="panel-head"><div><h3>Ngân sách theo hạng mục</h3><p>Kiểm soát ngân sách theo bộ phận, kỳ tháng/quý/năm và từng loại chi phí.</p></div></div><table><thead><tr><th>Mã ngân sách</th><th>Bộ phận</th><th>Hạng mục</th><th>Kỳ ngân sách</th><th>Được duyệt</th><th>Đã sử dụng</th><th>Còn lại</th><th>Trạng thái</th></tr></thead><tbody>${state.categoryBudgets.map(x=>`<tr><td><b>${x.id}</b></td><td>${x.department}</td><td><b>${x.category}</b></td><td>${budgetPeriodLabel(x)}</td><td>${money(x.approved)}</td><td>${money(x.used)}</td><td><b>${money(categoryBudgetRemaining(x))}</b></td><td>${badge(x.status)}</td></tr>`).join('')}</tbody></table></div>`}
 let registrationFlow='budget';
-let budgetFlow='registration';
 const expenseTypes=['Chiết khấu nhà phân phối','Chiết khấu bán hàng','Thưởng nhà phân phối','Hội chợ'];
 function setRegistrationFlow(flow){registrationFlow=flow;go('registrations')}
-function setBudgetFlow(flow){budgetFlow=flow;go('registrations')}
 function registrations(){
  const statuses=['Tạo mới','Chờ phê duyệt','Đã phê duyệt','Đang thực hiện','Chờ bổ sung tài liệu','Hoàn thành'];
  const isBudget=registrationFlow==='budget';
- const budgetType=budgetFlow==='registration'?'Ngân sách':'Điều chỉnh ngân sách';
- const records=state.approvals.filter(x=>isBudget?x.type===budgetType:!['Ngân sách','Điều chỉnh ngân sách'].includes(x.type));
- const types=isBudget?['Tất cả',budgetType]:['Tất cả',...expenseTypes];
- const rows=records.map(x=>{const action=processActionLabel(x);return `<tr data-reg-type="${x.type||''}"><td><b>${x.name}</b><span>${x.id}${x.budgetRef?` · ${x.budgetRef}`:''}</span></td><td>${isBudget?`<b>${x.department||'Chưa xác định'}</b><span>${x.category||'Chưa chọn hạng mục'} · ${x.periodType||'Ngân sách'}${x.adjustmentType?` · ${x.adjustmentType}`:''}</span>`:`<b>${x.type||'Khác'}</b><span>${x.budgetRef||'Chưa liên kết ngân sách'}</span>`}</td><td>${approvalTimeline(x)}</td><td><b>${money(x.amount)}</b>${x.reason?`<span>${x.reason}</span>`:''}</td><td>${badge(x.status)}</td><td>${action?`<button class="link-btn" onclick="advanceProcess('${x.id}')">${action}</button>`:'—'}</td></tr>`});
+ const records=state.approvals.filter(x=>isBudget?['Ngân sách','Điều chỉnh ngân sách'].includes(x.type):!['Ngân sách','Điều chỉnh ngân sách'].includes(x.type));
+ const types=isBudget?['Tất cả','Ngân sách','Điều chỉnh ngân sách']:['Tất cả',...expenseTypes];
+ const rows=records.map(x=>`<tr data-reg-type="${x.type||''}"><td><b>${x.name}</b><span>${x.id}${x.budgetRef?` · ${x.budgetRef}`:''}</span></td><td>${isBudget?`<b>${x.department||'Chưa xác định'}</b><span>${x.category||'Chưa chọn hạng mục'} · ${x.periodType||'Ngân sách'}${x.adjustmentType?` · ${x.adjustmentType}`:''}</span>`:`<b>${x.type||'Khác'}</b><span>${x.budgetRef||'Chưa liên kết ngân sách'}</span>`}</td><td>${approvalTimeline(x)}</td><td><b>${money(x.amount)}</b>${x.reason?`<span>${x.reason}</span>`:''}</td><td>${badge(x.status)}${x.decisionNote?`<span>${x.decisionNote}</span>`:''}</td><td>${processActions(x)}</td></tr>`);
  const cards=isBudget
- ? `<div class="registration-types">${budgetFlow==='registration'?`<button class="type-card" onclick="openBudgetRegistrationModal()"><span>◎</span><b>Đăng ký ngân sách</b><small>＋ Tạo đề nghị ngân sách mới</small></button>`:`<button class="type-card" onclick="openBudgetAdjustmentModal()"><span>↕</span><b>Điều chỉnh ngân sách</b><small>＋ Tạo đề nghị tăng hoặc giảm ngân sách</small></button>`}</div>`
+ ? `<div class="registration-types one-card"><button class="type-card combined-budget-card" onclick="openBudgetUnifiedModal()"><span>◎</span><b>Ngân sách</b><small>＋ Đăng ký mới hoặc điều chỉnh ngân sách</small></button></div>`
  : `<div class="registration-types compact">${expenseTypes.map((x,i)=>`<button class="type-card" onclick="openRegistrationModal('${x}')"><span>${['%','↘','★','◆'][i]}</span><b>${x}</b><small>＋ Tạo đăng ký chi phí</small></button>`).join('')}</div>`;
- const heading=isBudget?(budgetFlow==='registration'?'Luồng đăng ký ngân sách':'Luồng điều chỉnh ngân sách'):'Luồng đăng ký chi phí';
- const intro=isBudget?(budgetFlow==='registration'?'Dùng để đề xuất ngân sách tháng, quý hoặc năm theo từng bộ phận.':'Dùng để đề nghị tăng, giảm hoặc điều chuyển một ngân sách đã được phê duyệt.'):'Dùng để đăng ký từng khoản chi theo ngân sách đã được phê duyệt. Mỗi loại chi phí có bộ tài liệu bắt buộc riêng.';
+ const heading=isBudget?'Ngân sách':'Luồng đăng ký chi phí';
+ const intro=isBudget?'Quản lý tập trung toàn bộ đề nghị đăng ký mới và điều chỉnh ngân sách trong cùng một danh sách.':'Dùng để đăng ký từng khoản chi theo ngân sách đã được phê duyệt. Mỗi loại chi phí có bộ tài liệu bắt buộc riêng.';
  return `<div class="process-flow">${statuses.map((x,i)=>`<div><span>${i+1}</span><b>${x}</b>${i<statuses.length-1?'<i>→</i>':''}</div>`).join('')}</div>`+
  `<div class="flow-tabs primary-tabs"><button class="flow-tab ${isBudget?'active':''}" onclick="setRegistrationFlow('budget')">Ngân sách</button><button class="flow-tab ${!isBudget?'active':''}" onclick="setRegistrationFlow('expense')">Chi phí</button></div>`+
- (isBudget?`<div class="flow-tabs secondary-tabs"><button class="flow-tab ${budgetFlow==='registration'?'active':''}" onclick="setBudgetFlow('registration')">Đăng ký ngân sách</button><button class="flow-tab ${budgetFlow==='adjustment'?'active':''}" onclick="setBudgetFlow('adjustment')">Điều chỉnh ngân sách</button></div>`:'')+
  `<div class="panel flow-intro"><h3>${heading}</h3><p>${intro}</p></div>`+
  cards+
  summary([['Tạo mới',records.filter(x=>x.status==='Tạo mới').length],['Chờ phê duyệt',records.filter(x=>x.status==='Chờ phê duyệt').length],['Đang thực hiện',records.filter(x=>x.status==='Đang thực hiện').length],['Hoàn thành',records.filter(x=>x.status==='Hoàn thành').length]])+
- `<div class="panel table-wrap"><div class="toolbar"><div class="toolbar-left">${types.map((x,i)=>`<button class="chip ${i===0?'active':''}" onclick="filterRegistration('${x}',this)">${x}</button>`).join('')}</div><button class="btn primary" onclick="${isBudget?(budgetFlow==='registration'?'openBudgetRegistrationModal()':'openBudgetAdjustmentModal()'):`openRegistrationModal('')`}">＋ ${isBudget?(budgetFlow==='registration'?'Tạo đăng ký ngân sách':'Tạo điều chỉnh ngân sách'):'Tạo đăng ký chi phí'}</button></div><table><thead><tr><th>Nội dung</th><th>${isBudget?'Bộ phận / Kỳ ngân sách':'Loại chi phí'}</th><th>Luồng người xử lý</th><th>Số tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${rows.length?rows.join(''):'<tr><td colspan="6" class="empty">Chưa có dữ liệu</td></tr>'}</tbody></table></div>`
+ `<div class="panel table-wrap"><div class="toolbar"><div class="toolbar-left">${types.map((x,i)=>`<button class="chip ${i===0?'active':''}" onclick="filterRegistration('${x}',this)">${x}</button>`).join('')}</div><button class="btn primary" onclick="${isBudget?'openBudgetUnifiedModal()':`openRegistrationModal('')`}">＋ ${isBudget?'Tạo đăng ký / điều chỉnh':'Tạo đăng ký chi phí'}</button></div><table><thead><tr><th>Nội dung</th><th>${isBudget?'Bộ phận / Kỳ ngân sách':'Loại chi phí'}</th><th>Luồng người xử lý</th><th>Số tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${rows.length?rows.join(''):'<tr><td colspan="6" class="empty">Chưa có dữ liệu</td></tr>'}</tbody></table></div>`
+}
+function openBudgetUnifiedModal(){
+ window.activeFormKey='registrations';
+ document.getElementById('modalTitle').textContent='Ngân sách';
+ document.getElementById('modalHint').textContent='Chọn đăng ký ngân sách mới hoặc điều chỉnh một ngân sách đã được phê duyệt.';
+ document.getElementById('recordForm').innerHTML=`<div class="field full"><label>Loại yêu cầu<select id="budgetRequestType"><option value="registration">Đăng ký ngân sách</option><option value="adjustment">Điều chỉnh ngân sách</option></select></label></div><div class="budget-choice-grid full"><button type="button" class="budget-choice active" id="budgetRegistrationChoice"><span>◎</span><b>Đăng ký ngân sách</b><small>Tạo ngân sách tháng, quý hoặc năm theo bộ phận và hạng mục.</small></button><button type="button" class="budget-choice" id="budgetAdjustmentChoice"><span>↕</span><b>Điều chỉnh ngân sách</b><small>Tăng, giảm hoặc điều chuyển ngân sách đã được phê duyệt.</small></button></div>`;
+ const save=document.getElementById('saveRecord');save.style.display='none';
+ const select=document.getElementById('budgetRequestType');
+ const reg=document.getElementById('budgetRegistrationChoice');
+ const adj=document.getElementById('budgetAdjustmentChoice');
+ const choose=v=>{if(v==='registration')openBudgetRegistrationModal();else openBudgetAdjustmentModal();save.style.display='inline-flex'};
+ select.onchange=()=>{reg.classList.toggle('active',select.value==='registration');adj.classList.toggle('active',select.value==='adjustment')};
+ reg.onclick=()=>choose('registration');adj.onclick=()=>choose('adjustment');
+ document.getElementById('modalBackdrop').style.display='grid';
 }
 function filterRegistration(type,btn){document.querySelectorAll('.toolbar .chip').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('tbody tr[data-reg-type]').forEach(r=>r.style.display=type==='Tất cả'||r.dataset.regType===type?'':'none')}
 const requesterDepartments={
@@ -189,6 +221,7 @@ function updateBudgetRegistrationName(){
  const input=f.querySelector('[name="name"]');if(input)input.value=name;
 }
 function openBudgetRegistrationModal(){
+ document.getElementById('saveRecord').style.display='inline-flex';
  window.activeFormKey='registrations';
  document.getElementById('modalTitle').textContent='Tạo đăng ký ngân sách';
  document.getElementById('modalHint').textContent='Chọn kỳ ngân sách; nội dung và bộ phận được hệ thống tự động điền.';
@@ -213,6 +246,7 @@ function openBudgetRegistrationModal(){
  document.getElementById('modalBackdrop').style.display='grid';
 }
 function openBudgetAdjustmentModal(){
+ document.getElementById('saveRecord').style.display='inline-flex';
  window.activeFormKey='registrations';
  document.getElementById('modalTitle').textContent='Tạo điều chỉnh ngân sách';
  document.getElementById('modalHint').textContent='Chọn ngân sách cần điều chỉnh, hình thức tăng/giảm và nêu rõ lý do.';
@@ -244,7 +278,8 @@ function openBudgetAdjustmentModal(){
  document.getElementById('modalBackdrop').style.display='grid';
 }
 function openRegistrationModal(type=''){
- if(registrationFlow==='budget'||type==='Ngân sách'){budgetFlow==='adjustment'?openBudgetAdjustmentModal():openBudgetRegistrationModal();return}
+ document.getElementById('saveRecord').style.display='inline-flex';
+ if(registrationFlow==='budget'||type==='Ngân sách'){openBudgetUnifiedModal();return}
  window.activeFormKey='registrations';
  document.getElementById('modalTitle').textContent='Tạo đăng ký chi phí';
  document.getElementById('modalHint').textContent='Khoản chi phải liên kết đúng ngân sách hạng mục và không được vượt số dư của kỳ tháng, quý hoặc năm.';
@@ -299,6 +334,48 @@ function openMonthlyBudgetModal(){openModal('monthlyBudgets')}
 function closeModal(){document.getElementById('modalBackdrop').style.display='none';window.activeFormKey=null}
 function saveRecord(){const key=window.activeFormKey||current;const schema=formSchemas[key];if(!schema)return;const fd=new FormData(document.getElementById('recordForm'));const obj={};if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(fd.get('type'))){for(const [k,v] of fd.entries())obj[k]=k==='amount'?Number(v||0):v;obj.usedAmount=0;obj.year=Number(obj.year);if(obj.month)obj.month=Number(obj.month);if(obj.quarter)obj.quarter=Number(obj.quarter);}else{schema.forEach(f=>obj[f[0]]=f[2]==='number'?Number(fd.get(f[0])||0):fd.get(f[0]));}if(!obj.name){showToast('Vui lòng nhập tên hoặc nội dung');return}if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)&&!obj.amount){showToast('Vui lòng nhập số tiền ngân sách');return}if(key==='registrations'&&!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(!b){showToast('Không có ngân sách hạng mục phù hợp. Vui lòng đăng ký hoặc điều chỉnh ngân sách trước.');return}const remain=categoryBudgetRemaining(b);if(obj.amount>remain){showToast(`Chi phí vượt ngân sách còn lại ${money(remain)} của ${budgetPeriodLabel(b)} — ${b.category}`);return}obj.category=b.category;obj.department=b.department;obj.periodType=b.periodType;obj.month=b.month||'';obj.quarter=b.quarter||'';obj.year=b.year;}const prefixes={discounts:'CK',programs:'CT',expenses:'CP',documents:'HS',registrations:'QT',monthlyBudgets:'NS-T'};obj.id=key==='monthlyBudgets'?`NS-T${String(obj.month).padStart(2,'0')}-${obj.year}`:`${prefixes[key]}-${Date.now().toString().slice(-6)}`;if(key==='documents'&&obj.updated)obj.updated=new Date(obj.updated).toLocaleDateString('vi-VN');if(key==='monthlyBudgets'){const existing=state.monthlyBudgets.findIndex(x=>x.month===obj.month&&x.year===obj.year);if(existing>=0)state.monthlyBudgets[existing]=obj;else state.monthlyBudgets.push(obj);state.monthlyBudgets.sort((a,b)=>a.year-b.year||a.month-b.month)}else if(key==='registrations'){obj.approvalTotal=2;obj.approvalStep=obj.status==='Tạo mới'||obj.status==='Chờ phê duyệt'?0:2;state.approvals.unshift(obj);if(!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(b)b.used=Number(b.used||0)+Number(obj.amount||0);}}else state[key].unshift(obj);persist();closeModal();go(key==='monthlyBudgets'?'master':current);showToast('Đã lưu bản ghi mới')}
 function removeItem(key,id){state[key]=state[key].filter(x=>x.id!==id);persist();go(current);showToast('Đã xóa bản ghi')}
+function submitProcess(id){
+ const x=state.approvals.find(i=>i.id===id);if(!x)return;
+ x.status='Chờ phê duyệt';x.approvalStep=0;x.decisionNote='Đã nộp đơn, chờ Trưởng bộ phận';x.submittedAt=new Date().toLocaleString('vi-VN');persist();go('registrations');showToast('Đã nộp đơn để phê duyệt');
+}
+function editProcess(id){
+ const x=state.approvals.find(i=>i.id===id);if(!x)return;
+ const amount=prompt('Điều chỉnh số tiền',String(x.amount||0));if(amount===null)return;
+ const value=Number(String(amount).replace(/[^0-9]/g,''));if(!value){showToast('Số tiền không hợp lệ');return;}
+ const name=prompt('Điều chỉnh nội dung',x.name||'');if(name===null)return;
+ x.amount=value;x.name=name.trim()||x.name;x.decisionNote='Đã điều chỉnh bởi '+CURRENT_USER;persist();go('registrations');showToast('Đã cập nhật đơn');
+}
+function deleteProcess(id){
+ const x=state.approvals.find(i=>i.id===id);if(!x||!['Tạo mới','Hoàn trả'].includes(x.status))return;
+ if(!confirm('Xóa đơn này? Dữ liệu đã xóa không thể khôi phục.'))return;
+ state.approvals=state.approvals.filter(i=>i.id!==id);persist();go('registrations');showToast('Đã xóa đơn');
+}
+function rejectProcess(id){
+ const x=state.approvals.find(i=>i.id===id);if(!x)return;
+ const reason=prompt('Nhập lý do từ chối');if(reason===null||!reason.trim()){showToast('Vui lòng nhập lý do từ chối');return;}
+ x.status='Từ chối';x.decisionNote='Từ chối: '+reason.trim();x.decidedBy=nextApprover(x);x.decidedAt=new Date().toLocaleString('vi-VN');persist();go('registrations');showToast('Đã từ chối đơn');
+}
+function returnProcess(id){
+ const x=state.approvals.find(i=>i.id===id);if(!x)return;
+ const reason=prompt('Nhập nội dung yêu cầu điều chỉnh');if(reason===null||!reason.trim()){showToast('Vui lòng nhập nội dung hoàn trả');return;}
+ x.status='Hoàn trả';x.decisionNote='Hoàn trả: '+reason.trim();x.returnedBy=nextApprover(x);x.approvalStep=0;persist();go('registrations');showToast('Đã hoàn trả đơn cho người nộp');
+}
+function approveProcess(id){
+ const x=state.approvals.find(i=>i.id===id);if(!x||x.status!=='Chờ phê duyệt')return;
+ x.approvalTotal=x.approvalTotal||2;x.approvalStep=(x.approvalStep||0)+1;
+ if(x.approvalStep<x.approvalTotal){x.decisionNote='Trưởng bộ phận đã phê duyệt, chuyển Tài vụ';}
+ else{
+  x.status=isBudgetProcess(x)?'Đang thực hiện':'Đã phê duyệt';x.decisionNote=isBudgetProcess(x)?'Đã hoàn tất phê duyệt và bắt đầu thực hiện':'Đã hoàn tất phê duyệt';
+  applyApprovedBudgetChange(x);
+ }
+ persist();go('registrations');showToast(x.status==='Chờ phê duyệt'?'Đã phê duyệt và chuyển người tiếp theo':'Đã hoàn tất phê duyệt');
+}
+function applyApprovedBudgetChange(x){
+ if(x.type==='Ngân sách'&&!x.budgetCreated){const code=x.periodType==='Tháng'?`T${String(x.month).padStart(2,'0')}`:x.periodType==='Quý'?`Q${x.quarter}`:'N';const catCode=(x.category||'Khác').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z]/g,'').slice(0,6).toUpperCase();const id=`NS-HM-${catCode}-${code}-${x.year}`;if(!state.categoryBudgets.some(i=>i.id===id))state.categoryBudgets.unshift({id,department:x.department,category:x.category||'Khác',periodType:x.periodType,month:x.month||'',quarter:x.quarter||'',year:x.year,approved:Number(x.amount||0),used:0,status:'Đang thực hiện'});x.budgetCreated=true;}
+ if(x.type==='Điều chỉnh ngân sách'&&!x.adjustmentApplied){const b=state.categoryBudgets.find(i=>i.id===x.budgetRef);if(b){if(x.adjustmentType==='Tăng ngân sách')b.approved+=Number(x.amount||0);else if(x.adjustmentType==='Giảm ngân sách'){if(Number(x.amount||0)>categoryBudgetRemaining(b)){x.status='Chờ phê duyệt';x.approvalStep=x.approvalTotal-1;showToast('Không thể giảm vượt phần ngân sách còn lại');return}b.approved-=Number(x.amount||0);}x.adjustmentApplied=true;}}
+}
+function finishBudget(id){const x=state.approvals.find(i=>i.id===id);if(!x)return;x.usedAmount=x.amount;x.status='Hoàn thành';x.completionReason='Đã sử dụng hết ngân sách';persist();go('registrations');showToast('Ngân sách đã hoàn thành');}
+
 function advanceProcess(id){const x=state.approvals.find(i=>i.id===id);if(!x)return;
  if(x.status==='Tạo mới'){x.status='Chờ phê duyệt';x.approvalStep=0;}
  else if(x.status==='Chờ phê duyệt'){
