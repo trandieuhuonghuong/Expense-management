@@ -1,31 +1,19 @@
-# SalesCost Pro v2
+# SalesCost Pro – Bản cập nhật cấu trúc menu
 
-Bản web mẫu quản lý chi phí bán hàng, chạy độc lập và có thể triển khai trên Vercel.
+## Điều chỉnh chính
+- Không tách Chính sách chiết khấu, Chương trình bán hàng và Ngân sách thành module riêng.
+- Ba nhóm dữ liệu này được quản lý tập trung trong trang Dữ liệu gốc.
+- Đổi module Phê duyệt thành Đăng ký.
+- Giữ phần ngân sách theo tháng tại Tổng quan và trong Dữ liệu gốc.
 
-## Chức năng
-- Dashboard tổng quan.
-- Dữ liệu gốc.
-- Chính sách chiết khấu.
-- Chương trình bán hàng.
-- Ngân sách.
-- Chi phí bán hàng.
-- Phê duyệt.
-- Hồ sơ & chứng từ.
-- Báo cáo và cấu hình.
-- Thêm/xóa dữ liệu mẫu.
-- Lưu dữ liệu bằng localStorage.
-- Xuất dữ liệu JSON.
+## Chạy thử
+Mở `index.html` trực tiếp hoặc chạy:
 
-## Chạy trực tiếp
-Mở file `index.html` bằng trình duyệt.
+```bash
+npm run dev
+```
 
-## Đưa lên Vercel
-1. Tải toàn bộ file lên thư mục gốc của GitHub repository.
-2. Import repository vào Vercel.
-3. Framework Preset: Other.
-4. Build Command: `npm run build`.
-5. Output Directory: `dist`.
-6. Deploy.
-
-## Lưu ý
-Đây là bản demo front-end. Dữ liệu hiện lưu trong trình duyệt của từng thiết bị. Để đồng bộ nhiều tài khoản và lưu file thật, cần kết nối Supabase hoặc một backend tương đương.
+## Triển khai Vercel
+- Framework Preset: Other
+- Build Command: `npm run build`
+- Output Directory: `dist`
