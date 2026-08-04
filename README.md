@@ -14,3 +14,9 @@ Mở trực tiếp `index.html` hoặc chạy `npm run dev`.
 - Framework Preset: Other
 - Build Command: `npm run build`
 - Output Directory: `dist`
+
+## Cập nhật luồng đăng ký ngân sách
+- Ngân sách được phân theo bộ phận.
+- Người nộp đơn mặc định là Trần Diệu Hương; bộ phận tự động lấy theo người nộp đơn.
+- Chọn kỳ ngân sách: Tháng, Quý hoặc Năm.
+- Nội dung tự sinh theo kỳ, ví dụ: Ngân sách tháng 6/2026, Ngân sách quý 2/2026, Ngân sách năm 2027.
