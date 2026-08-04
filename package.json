@@ -1,0 +1,6 @@
+{
+  "name": "sales-expense-manager",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {"dev":"npx serve .","build":"echo Static site ready"}
+}
