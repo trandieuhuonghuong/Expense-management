@@ -1,26 +1,24 @@
-# SalesCost Pro – Bản cập nhật cấu trúc menu
+# SalesCost Pro – Quy trình phê duyệt
 
-## Điều chỉnh chính
-- Không tách Chính sách chiết khấu, Chương trình bán hàng và Ngân sách thành module riêng.
-- Ba nhóm dữ liệu này được quản lý tập trung trong trang Dữ liệu gốc.
-- Đổi module Phê duyệt thành Đăng ký.
-- Giữ phần ngân sách theo tháng tại Tổng quan và trong Dữ liệu gốc.
+Bản web mẫu quản lý chi phí bán hàng, đã cập nhật:
+
+- Bỏ module Thương hiệu.
+- Quy trình gồm: Người tạo đơn → Trưởng bộ phận → Tài vụ.
+- Thay cấp phê duyệt bằng tên người phê duyệt thực tế.
+- Trạng thái: Tạo mới → Chờ phê duyệt → Đã phê duyệt → Đang thực hiện → Chờ bổ sung tài liệu → Hoàn thành.
+- Module Hồ sơ & chứng từ đã đổi thành Tài liệu.
+- Dữ liệu lưu trên trình duyệt bằng localStorage.
 
 ## Chạy thử
-Mở `index.html` trực tiếp hoặc chạy:
+
+Mở trực tiếp `index.html`, hoặc chạy:
 
 ```bash
-npm run dev
+npm run build
 ```
 
-## Triển khai Vercel
+## Vercel
+
 - Framework Preset: Other
 - Build Command: `npm run build`
 - Output Directory: `dist`
-
-
-## Cập nhật quy trình
-- Module Đăng ký đổi thành Quy trình.
-- Trạng thái: Tạo mới → Chờ phê duyệt → Đã phê duyệt → Đang thực hiện → Chờ bổ sung hồ sơ → Hoàn thành.
-- Hỗ trợ phê duyệt nhiều cấp.
-- Module Hồ sơ & chứng từ đổi thành Tài liệu.
