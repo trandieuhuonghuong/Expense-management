@@ -17,3 +17,10 @@ npm run dev
 - Framework Preset: Other
 - Build Command: `npm run build`
 - Output Directory: `dist`
+
+
+## Cập nhật quy trình
+- Module Đăng ký đổi thành Quy trình.
+- Trạng thái: Tạo mới → Chờ phê duyệt → Đã phê duyệt → Đang thực hiện → Chờ bổ sung hồ sơ → Hoàn thành.
+- Hỗ trợ phê duyệt nhiều cấp.
+- Module Hồ sơ & chứng từ đổi thành Tài liệu.
