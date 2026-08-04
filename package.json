@@ -1,6 +1,9 @@
 {
-  "name": "sales-expense-manager",
+  "name": "sales-expense-manager-full",
   "private": true,
-  "version": "1.0.0",
-  "scripts": {"dev":"npx serve .","build":"echo Static site ready"}
+  "version": "1.0.1",
+  "scripts": {
+    "dev": "python3 -m http.server 3000",
+    "build": "rm -rf dist && mkdir -p dist && cp index.html dist/index.html"
+  }
 }
