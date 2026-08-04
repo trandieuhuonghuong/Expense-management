@@ -1,4 +1,4 @@
-const STORAGE_KEY='salescost-pro-v4';
+const STORAGE_KEY='salescost-pro-v5';
 const navItems=[
  ['dashboard','▦','Tổng quan'],['master','◫','Dữ liệu gốc'],['expenses','💳','Chi phí'],['registrations','⇄','Quy trình'],['documents','📁','Tài liệu'],['reports','📊','Báo cáo'],['settings','⚙','Cấu hình']
 ];
@@ -27,13 +27,14 @@ const seed={
   {id:'CP-2026-201',name:'Chiết khấu thanh toán tháng 7',ref:'CK-TT-03',department:'Kinh doanh toàn quốc',amount:398000000,status:'Đã thanh toán'}
  ],
  documents:[
-  {id:'HS-1001',name:'Biên bản nghiệm thu trưng bày - NPP Minh Phát.pdf',type:'Biên bản nghiệm thu',ref:'CT-2026-018',updated:'03/08/2026',status:'Đã kiểm tra'},
-  {id:'HS-1002',name:'Bảng đối soát doanh số Q3 - Miền Bắc.xlsx',type:'Bảng đối soát',ref:'CT-2026-017',updated:'02/08/2026',status:'Chờ kiểm tra'},
-  {id:'HS-1003',name:'Phụ lục hợp đồng chiết khấu 2026.pdf',type:'Phụ lục hợp đồng',ref:'CK-DS-08',updated:'28/07/2026',status:'Đã kiểm tra'},
-  {id:'HS-1004',name:'Hình ảnh trưng bày - Đại lý An Khang.zip',type:'Hình ảnh minh chứng',ref:'CT-2026-018',updated:'01/08/2026',status:'Thiếu thông tin'}
+  {id:'HS-1001',name:'Biên bản nghiệm thu trưng bày - NPP Minh Phát.pdf',type:'Biên bản nghiệm thu',expenseType:'Hội chợ',ref:'CT-2026-018',updated:'03/08/2026',status:'Đã kiểm tra',completedDocs:5},
+  {id:'HS-1002',name:'Bảng đối soát doanh số Q3 - Miền Bắc.xlsx',type:'Bảng đối soát',expenseType:'Thưởng nhà phân phối',ref:'CT-2026-017',updated:'02/08/2026',status:'Chờ kiểm tra',completedDocs:3},
+  {id:'HS-1003',name:'Phụ lục hợp đồng chiết khấu 2026.pdf',type:'Phụ lục hợp đồng',expenseType:'Chiết khấu nhà phân phối',ref:'CK-DS-08',updated:'28/07/2026',status:'Đã kiểm tra',completedDocs:4},
+  {id:'HS-1004',name:'Hình ảnh trưng bày - Đại lý An Khang.zip',type:'Hình ảnh minh chứng',expenseType:'Hội chợ',ref:'CT-2026-018',updated:'01/08/2026',status:'Thiếu thông tin',completedDocs:4}
  ],
  approvals:[
-  {id:'QT-NS-0812',type:'Ngân sách',name:'Ngân sách tháng 9/2026',requester:'Nguyễn Minh Anh',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:1200000000,status:'Chờ phê duyệt',approvalStep:0,approvalTotal:2},
+  {id:'QT-NS-0812',type:'Ngân sách',name:'Ngân sách tháng 9/2026',requester:'Nguyễn Minh Anh',department:'Kinh doanh miền Nam',periodType:'Tháng',month:9,year:2026,managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:1200000000,usedAmount:0,status:'Chờ phê duyệt',approvalStep:0,approvalTotal:2},
+  {id:'QT-DCNS-0813',type:'Điều chỉnh ngân sách',name:'Điều chỉnh tăng ngân sách tháng 8/2026',requester:'Trần Diệu Hương',department:'Bộ phận Kinh doanh',periodType:'Tháng',month:8,year:2026,adjustmentType:'Tăng ngân sách',budgetRef:'NS-T08-2026',reason:'Bổ sung ngân sách hội chợ cuối tháng',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:150000000,usedAmount:0,status:'Chờ phê duyệt',approvalStep:1,approvalTotal:2},
   {id:'QT-CKPP-0811',type:'Chiết khấu nhà phân phối',name:'Chiết khấu doanh số NPP quý III',requester:'Trần Hoàng Long',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:280000000,status:'Chờ phê duyệt',approvalStep:1,approvalTotal:2},
   {id:'QT-CKBH-0810',type:'Chiết khấu bán hàng',name:'Chiết khấu bán hàng tháng 8',requester:'Lê Thùy Dương',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:168000000,status:'Đã phê duyệt',approvalStep:2,approvalTotal:2},
   {id:'QT-TNPP-0809',type:'Thưởng nhà phân phối',name:'Thưởng NPP đạt chỉ tiêu quý II',requester:'Phạm Tuấn Kiệt',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:360000000,status:'Đang thực hiện',approvalStep:2,approvalTotal:2},
@@ -80,10 +81,14 @@ function master(){const monthRows=state.monthlyBudgets.map(x=>{const remain=x.ap
 function discounts(){return table(['Chính sách','Đối tượng','Điều kiện','Mức chiết khấu','Phụ trách','Trạng thái',''],state.discounts.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.target}</td><td>${x.condition}</td><td><b>${x.value}</b></td><td>${x.owner}</td><td>${badge(x.status)}</td><td><button class="link-btn danger" onclick="removeItem('discounts','${x.id}')">Xóa</button></td></tr>`))}
 function programs(){return table(['Chương trình','Loại','Phụ trách','Thời gian','Ngân sách','Trạng thái'],state.programs.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.type}</td><td>${x.owner}</td><td>${x.period}</td><td><b>${money(x.budget)}</b></td><td>${badge(x.status)}</td></tr>`))}
 function budget(){const annualPlanned=state.budgets.reduce((s,x)=>s+x.planned,0),annualApproved=state.budgets.reduce((s,x)=>s+x.approved,0),annualUsed=state.budgets.reduce((s,x)=>s+x.used,0);const max=Math.max(...state.monthlyBudgets.map(x=>x.approved),1);return summary([['Kế hoạch năm',money(annualPlanned)],['Đã đăng ký',money(annualApproved)],['Đã sử dụng',money(annualUsed)],['Còn lại',money(annualApproved-annualUsed)]])+`<div class="panel monthly-panel"><div class="panel-head"><div><h3>Ngân sách theo tháng</h3><p>So sánh ngân sách được đăng ký và số tiền đã sử dụng trong năm 2026</p></div><button class="btn primary" onclick="openMonthlyBudgetModal()">＋ Thêm ngân sách tháng</button></div><div class="monthly-chart">${state.monthlyBudgets.map(x=>{const approved=Math.round(x.approved/max*100),used=Math.round(x.used/max*100);return `<div class="month-col"><div class="month-values"><span>${Math.round(x.approved/1000000)}</span><b>${x.used?Math.round(x.used/1000000):0}</b></div><div class="month-bars"><i style="height:${approved}%"></i><em style="height:${used}%"></em></div><small>T${x.month}</small></div>`}).join('')}</div><div class="chart-key"><span><i class="approved-key"></i>Ngân sách đăng ký</span><span><i class="used-key"></i>Đã sử dụng</span><small>Đơn vị: triệu đồng</small></div></div>`+table(['Tháng','Kế hoạch','Đăng ký','Đã sử dụng','Còn lại','Tỷ lệ sử dụng','Trạng thái',''],state.monthlyBudgets.map(x=>{const remain=x.approved-x.used,rate=x.approved?Math.round(x.used/x.approved*100):0;return `<tr><td><b>Tháng ${x.month}/${x.year}</b><span>${x.id}</span></td><td>${money(x.planned)}</td><td><b>${money(x.approved)}</b></td><td>${money(x.used)}</td><td><b>${money(remain)}</b></td><td><div class="usage"><div><i style="width:${Math.min(rate,100)}%"></i></div><b>${rate}%</b></div></td><td>${badge(x.status)}</td><td><button class="link-btn danger" onclick="removeItem('monthlyBudgets','${x.id}')">Xóa</button></td></tr>`})) + `<div class="section-gap"></div>` + `<h3 class="section-title">Ngân sách theo khu vực</h3>` + table(['Ngân sách','Bộ phận','Kế hoạch','Đăng ký','Đã sử dụng','Còn lại'],state.budgets.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.owner}</td><td>${money(x.planned)}</td><td><b>${money(x.approved)}</b></td><td>${money(x.used)}</td><td><b>${money(x.approved-x.used)}</b></td></tr>`))}
-function expenses(){return summary([['Chờ đăng ký',money(state.expenses.filter(x=>x.status.includes('Chờ đăng ký')).reduce((s,x)=>s+x.amount,0))],['Đã đăng ký',money(state.expenses.filter(x=>x.status.includes('Đã đăng ký')).reduce((s,x)=>s+x.amount,0))],['Chờ thanh toán',money(state.expenses.filter(x=>x.status.includes('Chờ thanh toán')).reduce((s,x)=>s+x.amount,0))],['Đã thanh toán',money(state.expenses.filter(x=>x.status.includes('Đã thanh toán')).reduce((s,x)=>s+x.amount,0))]])+table(['Khoản chi phí','Chương trình/chính sách','Bộ phận','Số tiền','Trạng thái',''],state.expenses.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td><b>${x.ref}</b></td><td>${x.department}</td><td><b>${money(x.amount)}</b></td><td>${badge(x.status)}</td><td><button class="link-btn danger" onclick="removeItem('expenses','${x.id}')">Xóa</button></td></tr>`))}
+function expenses(){return summary([['Chờ đăng ký',money(state.expenses.filter(x=>x.status.includes('Chờ đăng ký')).reduce((s,x)=>s+x.amount,0))],['Đã đăng ký',money(state.expenses.filter(x=>x.status.includes('Đã đăng ký')).reduce((s,x)=>s+x.amount,0))],['Chờ thanh toán',money(state.expenses.filter(x=>x.status.includes('Chờ thanh toán')).reduce((s,x)=>s+x.amount,0))],['Đã thanh toán',money(state.expenses.filter(x=>x.status.includes('Đã thanh toán')).reduce((s,x)=>s+x.amount,0))]])+table(['Khoản chi phí','Chương trình/chính sách','Bộ phận','Số tiền','Trạng thái',''],state.expenses.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td><b>${x.ref}</b></td><td>${x.department}</td><td><b>${money(x.amount)}</b>${isBudget?`<span>Đã dùng: ${money(x.usedAmount||0)}</span>`:''}</td><td>${badge(x.status)}${x.completionReason?`<span>${x.completionReason}</span>`:''}</td><td><button class="link-btn danger" onclick="removeItem('expenses','${x.id}')">Xóa</button></td></tr>`))}
 function processActionLabel(x){
- const map={'Tạo mới':'Gửi phê duyệt','Đã phê duyệt':'Bắt đầu thực hiện','Đang thực hiện':'Đã sử dụng hết chi phí','Chờ bổ sung tài liệu':'Xác nhận đủ tài liệu'};
  if(x.status==='Chờ phê duyệt') return (x.approvalStep||0)===0?'Trưởng bộ phận phê duyệt':'Tài vụ phê duyệt';
+ if(['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)){
+  const map={'Tạo mới':'Gửi phê duyệt','Đang thực hiện':'Ghi nhận đã sử dụng hết'};
+  return map[x.status]||'';
+ }
+ const map={'Tạo mới':'Gửi phê duyệt','Đã phê duyệt':'Bắt đầu thực hiện','Đang thực hiện':'Đã sử dụng hết chi phí','Chờ bổ sung tài liệu':'Xác nhận đủ tài liệu'};
  return map[x.status]||'';
 }
 function approvalTimeline(x){
@@ -95,24 +100,46 @@ function approvalTimeline(x){
  ];
  return `<div class="approval-mini">${items.map((i,n)=>`<div class="approval-person"><span>${n===0?'●':(i[2]==='Đã phê duyệt'?'✓':'○')}</span><div><b>${i[0]}</b><small>${i[1]} · ${i[2]}</small></div></div>`).join('')}</div>`;
 }
+function budgetPeriodEnd(x){
+ const y=Number(x.year||2026);
+ if(x.periodType==='Tháng') return new Date(y,Number(x.month||1),0,23,59,59);
+ if(x.periodType==='Quý') return new Date(y,Number(x.quarter||1)*3,0,23,59,59);
+ return new Date(y,11,31,23,59,59);
+}
+function syncBudgetStatuses(){
+ const now=new Date();let changed=false;
+ state.approvals.forEach(x=>{
+  if(!['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)||x.status!=='Đang thực hiện')return;
+  const exhausted=Number(x.usedAmount||0)>=Number(x.amount||0)&&Number(x.amount||0)>0;
+  const expired=now>budgetPeriodEnd(x);
+  if(exhausted||expired){x.status='Hoàn thành';x.completionReason=exhausted?'Đã sử dụng hết ngân sách':'Đã hết kỳ ngân sách';changed=true;}
+ });
+ if(changed)persist();
+}
 let registrationFlow='budget';
+let budgetFlow='registration';
 const expenseTypes=['Chiết khấu nhà phân phối','Chiết khấu bán hàng','Thưởng nhà phân phối','Hội chợ'];
 function setRegistrationFlow(flow){registrationFlow=flow;go('registrations')}
+function setBudgetFlow(flow){budgetFlow=flow;go('registrations')}
 function registrations(){
  const statuses=['Tạo mới','Chờ phê duyệt','Đã phê duyệt','Đang thực hiện','Chờ bổ sung tài liệu','Hoàn thành'];
  const isBudget=registrationFlow==='budget';
- const records=state.approvals.filter(x=>isBudget?x.type==='Ngân sách':x.type!=='Ngân sách');
- const types=isBudget?['Tất cả','Ngân sách']:['Tất cả',...expenseTypes];
- const rows=records.map(x=>{const action=processActionLabel(x);return `<tr data-reg-type="${x.type||''}"><td><b>${x.name}</b><span>${x.id}</span></td><td>${isBudget?`<b>${x.department||'Chưa xác định'}</b><span>${x.periodType||'Ngân sách'}</span>`:(x.type||'Khác')}</td><td>${approvalTimeline(x)}</td><td><b>${money(x.amount)}</b></td><td>${badge(x.status)}</td><td>${action?`<button class="link-btn" onclick="advanceProcess('${x.id}')">${action}</button>`:'—'}</td></tr>`});
+ const budgetType=budgetFlow==='registration'?'Ngân sách':'Điều chỉnh ngân sách';
+ const records=state.approvals.filter(x=>isBudget?x.type===budgetType:!['Ngân sách','Điều chỉnh ngân sách'].includes(x.type));
+ const types=isBudget?['Tất cả',budgetType]:['Tất cả',...expenseTypes];
+ const rows=records.map(x=>{const action=processActionLabel(x);return `<tr data-reg-type="${x.type||''}"><td><b>${x.name}</b><span>${x.id}${x.budgetRef?` · ${x.budgetRef}`:''}</span></td><td>${isBudget?`<b>${x.department||'Chưa xác định'}</b><span>${x.periodType||'Ngân sách'}${x.adjustmentType?` · ${x.adjustmentType}`:''}</span>`:(x.type||'Khác')}</td><td>${approvalTimeline(x)}</td><td><b>${money(x.amount)}</b>${x.reason?`<span>${x.reason}</span>`:''}</td><td>${badge(x.status)}</td><td>${action?`<button class="link-btn" onclick="advanceProcess('${x.id}')">${action}</button>`:'—'}</td></tr>`});
  const cards=isBudget
- ? `<div class="registration-types"><button class="type-card" onclick="openRegistrationModal('Ngân sách')"><span>◎</span><b>Đăng ký ngân sách</b><small>＋ Tạo đề nghị ngân sách mới</small></button></div>`
+ ? `<div class="registration-types">${budgetFlow==='registration'?`<button class="type-card" onclick="openBudgetRegistrationModal()"><span>◎</span><b>Đăng ký ngân sách</b><small>＋ Tạo đề nghị ngân sách mới</small></button>`:`<button class="type-card" onclick="openBudgetAdjustmentModal()"><span>↕</span><b>Điều chỉnh ngân sách</b><small>＋ Tạo đề nghị tăng hoặc giảm ngân sách</small></button>`}</div>`
  : `<div class="registration-types compact">${expenseTypes.map((x,i)=>`<button class="type-card" onclick="openRegistrationModal('${x}')"><span>${['%','↘','★','◆'][i]}</span><b>${x}</b><small>＋ Tạo đăng ký chi phí</small></button>`).join('')}</div>`;
+ const heading=isBudget?(budgetFlow==='registration'?'Luồng đăng ký ngân sách':'Luồng điều chỉnh ngân sách'):'Luồng đăng ký chi phí';
+ const intro=isBudget?(budgetFlow==='registration'?'Dùng để đề xuất ngân sách tháng, quý hoặc năm theo từng bộ phận.':'Dùng để đề nghị tăng, giảm hoặc điều chuyển một ngân sách đã được phê duyệt.'):'Dùng để đăng ký từng khoản chi theo ngân sách đã được phê duyệt. Mỗi loại chi phí có bộ tài liệu bắt buộc riêng.';
  return `<div class="process-flow">${statuses.map((x,i)=>`<div><span>${i+1}</span><b>${x}</b>${i<statuses.length-1?'<i>→</i>':''}</div>`).join('')}</div>`+
- `<div class="flow-tabs"><button class="flow-tab ${isBudget?'active':''}" onclick="setRegistrationFlow('budget')">Đăng ký ngân sách</button><button class="flow-tab ${!isBudget?'active':''}" onclick="setRegistrationFlow('expense')">Đăng ký chi phí</button></div>`+
- `<div class="panel flow-intro"><h3>${isBudget?'Luồng đăng ký ngân sách':'Luồng đăng ký chi phí'}</h3><p>${isBudget?'Dùng để đề xuất ngân sách tháng, quý hoặc năm. Ngân sách được phê duyệt trước khi tạo các khoản chi phí.':'Dùng để đăng ký từng khoản chi theo ngân sách đã được phê duyệt. Mỗi loại chi phí có bộ tài liệu bắt buộc riêng.'}</p></div>`+
+ `<div class="flow-tabs primary-tabs"><button class="flow-tab ${isBudget?'active':''}" onclick="setRegistrationFlow('budget')">Ngân sách</button><button class="flow-tab ${!isBudget?'active':''}" onclick="setRegistrationFlow('expense')">Chi phí</button></div>`+
+ (isBudget?`<div class="flow-tabs secondary-tabs"><button class="flow-tab ${budgetFlow==='registration'?'active':''}" onclick="setBudgetFlow('registration')">Đăng ký ngân sách</button><button class="flow-tab ${budgetFlow==='adjustment'?'active':''}" onclick="setBudgetFlow('adjustment')">Điều chỉnh ngân sách</button></div>`:'')+
+ `<div class="panel flow-intro"><h3>${heading}</h3><p>${intro}</p></div>`+
  cards+
  summary([['Tạo mới',records.filter(x=>x.status==='Tạo mới').length],['Chờ phê duyệt',records.filter(x=>x.status==='Chờ phê duyệt').length],['Đang thực hiện',records.filter(x=>x.status==='Đang thực hiện').length],['Hoàn thành',records.filter(x=>x.status==='Hoàn thành').length]])+
- `<div class="panel table-wrap"><div class="toolbar"><div class="toolbar-left">${types.map((x,i)=>`<button class="chip ${i===0?'active':''}" onclick="filterRegistration('${x}',this)">${x}</button>`).join('')}</div><button class="btn primary" onclick="openRegistrationModal('${isBudget?'Ngân sách':''}')">＋ ${isBudget?'Tạo đăng ký ngân sách':'Tạo đăng ký chi phí'}</button></div><table><thead><tr><th>Nội dung</th><th>${isBudget?'Bộ phận / Kỳ ngân sách':'Loại chi phí'}</th><th>Luồng người xử lý</th><th>Số tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${rows.length?rows.join(''):'<tr><td colspan="6" class="empty">Chưa có dữ liệu</td></tr>'}</tbody></table></div>`
+ `<div class="panel table-wrap"><div class="toolbar"><div class="toolbar-left">${types.map((x,i)=>`<button class="chip ${i===0?'active':''}" onclick="filterRegistration('${x}',this)">${x}</button>`).join('')}</div><button class="btn primary" onclick="${isBudget?(budgetFlow==='registration'?'openBudgetRegistrationModal()':'openBudgetAdjustmentModal()'):`openRegistrationModal('')`}">＋ ${isBudget?(budgetFlow==='registration'?'Tạo đăng ký ngân sách':'Tạo điều chỉnh ngân sách'):'Tạo đăng ký chi phí'}</button></div><table><thead><tr><th>Nội dung</th><th>${isBudget?'Bộ phận / Kỳ ngân sách':'Loại chi phí'}</th><th>Luồng người xử lý</th><th>Số tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${rows.length?rows.join(''):'<tr><td colspan="6" class="empty">Chưa có dữ liệu</td></tr>'}</tbody></table></div>`
 }
 function filterRegistration(type,btn){document.querySelectorAll('.toolbar .chip').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('tbody tr[data-reg-type]').forEach(r=>r.style.display=type==='Tất cả'||r.dataset.regType===type?'':'none')}
 const requesterDepartments={
@@ -170,8 +197,37 @@ function openBudgetRegistrationModal(){
  updateBudgetRequester();budgetPeriodFields();
  document.getElementById('modalBackdrop').style.display='grid';
 }
+function openBudgetAdjustmentModal(){
+ window.activeFormKey='registrations';
+ document.getElementById('modalTitle').textContent='Tạo điều chỉnh ngân sách';
+ document.getElementById('modalHint').textContent='Chọn ngân sách cần điều chỉnh, hình thức tăng/giảm và nêu rõ lý do.';
+ const people=Object.keys(requesterDepartments);
+ const budgetOptions=state.monthlyBudgets.map(x=>`<option value="${x.id}" data-month="${x.month}" data-year="${x.year}">${x.id} — Tháng ${x.month}/${x.year}</option>`).join('');
+ document.getElementById('recordForm').innerHTML=`
+  <input type="hidden" name="type" value="Điều chỉnh ngân sách">
+  <input type="hidden" name="managerApprover" value="Nguyễn Văn Nam">
+  <input type="hidden" name="financeApprover" value="Trần Thu Hà">
+  <input type="hidden" name="status" value="Tạo mới">
+  <input type="hidden" name="periodType" value="Tháng">
+  <input type="hidden" name="month" value="8">
+  <input type="hidden" name="year" value="2026">
+  <div class="field"><label>Người nộp đơn<select name="requester">${people.map(x=>`<option ${x==='Trần Diệu Hương'?'selected':''}>${x}</option>`).join('')}</select></label></div>
+  <div class="field"><label>Bộ phận<input name="department" type="text" readonly></label></div>
+  <div class="field full"><label>Ngân sách cần điều chỉnh<select name="budgetRef">${budgetOptions}</select></label></div>
+  <div class="field"><label>Hình thức điều chỉnh<select name="adjustmentType"><option>Tăng ngân sách</option><option>Giảm ngân sách</option><option>Điều chuyển ngân sách</option></select></label></div>
+  <div class="field"><label>Số tiền điều chỉnh<input name="amount" type="number" min="1" required></label></div>
+  <div class="field full"><label>Lý do điều chỉnh<textarea name="reason" rows="3" required></textarea></label></div>
+  <div class="field full"><label>Nội dung đăng ký<input name="name" type="text" readonly></label></div>`;
+ const f=document.getElementById('recordForm');
+ const requester=f.querySelector('[name="requester"]');
+ const ref=f.querySelector('[name="budgetRef"]');
+ const kind=f.querySelector('[name="adjustmentType"]');
+ const update=()=>{updateBudgetRequester();const opt=ref.selectedOptions[0];f.querySelector('[name="month"]').value=opt?.dataset.month||8;f.querySelector('[name="year"]').value=opt?.dataset.year||2026;f.querySelector('[name="name"]').value=`Điều chỉnh ${kind.value.toLowerCase()} tháng ${opt?.dataset.month||8}/${opt?.dataset.year||2026}`};
+ requester.addEventListener('change',update);ref.addEventListener('change',update);kind.addEventListener('change',update);update();
+ document.getElementById('modalBackdrop').style.display='grid';
+}
 function openRegistrationModal(type=''){
- if(registrationFlow==='budget'||type==='Ngân sách'){openBudgetRegistrationModal();return}
+ if(registrationFlow==='budget'||type==='Ngân sách'){budgetFlow==='adjustment'?openBudgetAdjustmentModal():openBudgetRegistrationModal();return}
  openModal('registrations');const el=document.querySelector('#recordForm select[name="type"]');if(el){el.value=type||'Chiết khấu nhà phân phối'}document.getElementById('modalTitle').textContent='Tạo đăng ký chi phí';document.getElementById('modalHint').textContent='Nhập thông tin đăng ký chi phí và người phê duyệt.'
 }
 const documentRequirements={
@@ -180,11 +236,18 @@ const documentRequirements={
  'Thưởng nhà phân phối':['Đề nghị thưởng','Quy định điều kiện thưởng','Bảng xác nhận chỉ tiêu','Biên bản xác nhận kết quả','Chứng từ chi thưởng'],
  'Hội chợ':['Đề xuất tham gia hội chợ','Phê duyệt ngân sách','Hợp đồng/đăng ký gian hàng','Hóa đơn chi phí','Biên bản nghiệm thu','Hình ảnh và báo cáo kết quả']
 };
+function documentRequirementFor(x){
+ const type=x.expenseType||(/chiết khấu/i.test(x.name)?'Chiết khấu nhà phân phối':/đối soát|thưởng/i.test(x.name)?'Thưởng nhà phân phối':/trưng bày|hình ảnh|nghiệm thu/i.test(x.name)?'Hội chợ':'Chiết khấu bán hàng');
+ const docs=documentRequirements[type]||[];
+ const completed=Math.min(Number(x.completedDocs||0),docs.length);
+ return {type,docs,completed,percent:docs.length?Math.round(completed/docs.length*100):0};
+}
 function documents(){
  const cards=Object.entries(documentRequirements).map(([type,docs],idx)=>{const completed=Math.max(1,docs.length-(idx%3));return `<div class="panel doc-checklist"><span class="flow-badge">${type}</span><h3>Bộ hồ sơ bắt buộc</h3><small>${completed}/${docs.length} tài liệu đã đủ</small>${docs.map((d,i)=>`<div class="doc-item ${i>=completed?'missing':''}"><i>${i<completed?'✓':'!'}</i><div><b>${d}</b><small>${i<completed?'Đã bổ sung và chờ/đã kiểm tra':'Bắt buộc bổ sung trước khi hoàn thành'}</small></div></div>`).join('')}<div class="doc-progress"><span style="width:${Math.round(completed/docs.length*100)}%"></span></div></div>`}).join('');
+ const rows=state.documents.map(x=>{const r=documentRequirementFor(x);return `<tr><td><b>📄 ${x.name}</b><span>${x.id}</span></td><td><b>${r.type}</b><div class="required-doc-list">${r.docs.map((d,i)=>`<span class="${i<r.completed?'done':'missing'}">${i<r.completed?'✓':'○'} ${d}</span>`).join('')}</div></td><td>${x.type}</td><td><b>${x.ref}</b></td><td>${x.updated}</td><td><div class="file-progress"><div><i style="width:${r.percent}%"></i></div><b>${r.completed}/${r.docs.length} · ${r.percent}%</b></div></td><td>${badge(x.status)}</td></tr>`});
  return summary([['Tổng tài liệu',state.documents.length],['Đã kiểm tra',state.documents.filter(x=>x.status.includes('Đã')).length],['Chờ kiểm tra',state.documents.filter(x=>x.status.includes('Chờ')).length],['Còn thiếu',state.documents.filter(x=>x.status.includes('Thiếu')).length]])+
  `<div class="panel flow-intro"><h3>Danh mục hồ sơ theo loại chi phí</h3><p>Mỗi đăng ký chi phí chỉ được chuyển sang Hoàn thành khi toàn bộ tài liệu bắt buộc của loại chi phí đó đã được bổ sung và kiểm tra.</p></div><div class="doc-requirement-grid">${cards}</div><div class="section-gap"></div>`+
- table(['Tên tài liệu','Loại tài liệu','Liên kết','Cập nhật','Trạng thái',''],state.documents.map(x=>`<tr><td><b>📄 ${x.name}</b><span>${x.id}</span></td><td>${x.type}</td><td><b>${x.ref}</b></td><td>${x.updated}</td><td>${badge(x.status)}</td><td><button class="link-btn danger" onclick="removeItem('documents','${x.id}')">Xóa</button></td></tr>`))
+ table(['Tên tài liệu','Danh mục tài liệu yêu cầu','Loại tài liệu','Liên kết','Cập nhật','Tiến độ hồ sơ','Trạng thái'],rows)
 }
 function reports(){const items=[['📊','Chi phí theo thời gian','Theo dõi biến động chi phí theo tháng, quý và năm'],['💳','Ngân sách và thực tế','So sánh ngân sách, đăng ký và chi phí thực tế'],['👥','Chi phí theo khách hàng','Phân tích chi phí và hiệu quả theo từng khách hàng'],['📦','Chi phí theo sản phẩm','Đánh giá ngân sách hỗ trợ theo nhóm sản phẩm'],['📍','Chi phí theo khu vực','So sánh mức chi phí giữa các khu vực kinh doanh'],['↗','Hiệu quả chương trình','Đo lường doanh số, chi phí và tỷ lệ hoàn thành']];return `<div class="report-grid">${items.map(x=>`<div class="panel report-card"><div class="report-icon">${x[0]}</div><h3>${x[1]}</h3><p>${x[2]}</p><button class="link-btn" onclick="showToast('Đã mở báo cáo mẫu')">Xem báo cáo →</button></div>`).join('')}</div>`}
 function settings(){return `<div class="grid-2"><div class="panel"><h3>Người tham gia phê duyệt</h3><p class="report-grid-note">Mỗi quy trình đi lần lượt qua người tạo đơn, trưởng bộ phận và tài vụ.</p>${[['Người tạo đơn','Người khởi tạo từng đề nghị'],['Trưởng bộ phận','Nguyễn Văn Nam / cấu hình theo phòng ban'],['Tài vụ','Trần Thu Hà / cấu hình theo đơn vị']].map(x=>`<div class="activity"><div class="grow"><b>${x[0]}</b><small>${x[1]}</small></div><span>→</span></div>`).join('')}<button class="btn primary" style="margin-top:14px" onclick="showToast('Đã lưu cấu hình người phê duyệt')">Lưu thay đổi</button></div><div class="panel"><h3>Cấu hình hệ thống</h3>${['Mã tự động','Phân quyền người dùng','Thông báo tài liệu','Ngôn ngữ hệ thống','Sao lưu dữ liệu'].map(x=>`<div class="activity"><div class="grow"><b>${x}</b><small>Cấu hình mô phỏng trong phiên bản demo</small></div><span>→</span></div>`).join('')}</div></div>`}
@@ -203,15 +266,21 @@ const formSchemas={
 function openModal(forcedKey){let key=forcedKey||current;window.activeFormKey=key;if(!formSchemas[key]){showToast('Trang này chưa hỗ trợ tạo mới trong bản demo');return}const schema=formSchemas[key];document.getElementById('modalTitle').textContent=key==='monthlyBudgets'?'Thêm ngân sách tháng':`Tạo ${navItems.find(x=>x[0]===key)[2]}`;document.getElementById('recordForm').innerHTML=schema.map(f=>`<div class="field ${f[0]==='name'?'full':''}"><label>${f[1]}${f[2]==='select'?`<select name="${f[0]}">${f[3].map(o=>`<option>${o}</option>`).join('')}</select>`:`<input name="${f[0]}" type="${f[2]}" required>`}</label></div>`).join('');document.getElementById('modalBackdrop').style.display='grid'}
 function openMonthlyBudgetModal(){openModal('monthlyBudgets')}
 function closeModal(){document.getElementById('modalBackdrop').style.display='none';window.activeFormKey=null}
-function saveRecord(){const key=window.activeFormKey||current;const schema=formSchemas[key];if(!schema)return;const fd=new FormData(document.getElementById('recordForm'));const obj={};if(key==='registrations'&&fd.get('type')==='Ngân sách'){for(const [k,v] of fd.entries())obj[k]=k==='amount'?Number(v||0):v;obj.year=Number(obj.year);if(obj.month)obj.month=Number(obj.month);if(obj.quarter)obj.quarter=Number(obj.quarter);}else{schema.forEach(f=>obj[f[0]]=f[2]==='number'?Number(fd.get(f[0])||0):fd.get(f[0]));}if(!obj.name){showToast('Vui lòng nhập tên hoặc nội dung');return}if(key==='registrations'&&obj.type==='Ngân sách'&&!obj.amount){showToast('Vui lòng nhập số tiền ngân sách');return}const prefixes={discounts:'CK',programs:'CT',expenses:'CP',documents:'HS',registrations:'QT',monthlyBudgets:'NS-T'};obj.id=key==='monthlyBudgets'?`NS-T${String(obj.month).padStart(2,'0')}-${obj.year}`:`${prefixes[key]}-${Date.now().toString().slice(-6)}`;if(key==='documents'&&obj.updated)obj.updated=new Date(obj.updated).toLocaleDateString('vi-VN');if(key==='monthlyBudgets'){const existing=state.monthlyBudgets.findIndex(x=>x.month===obj.month&&x.year===obj.year);if(existing>=0)state.monthlyBudgets[existing]=obj;else state.monthlyBudgets.push(obj);state.monthlyBudgets.sort((a,b)=>a.year-b.year||a.month-b.month)}else if(key==='registrations'){obj.approvalTotal=2;obj.approvalStep=obj.status==='Tạo mới'||obj.status==='Chờ phê duyệt'?0:2;state.approvals.unshift(obj);}else state[key].unshift(obj);persist();closeModal();go(key==='monthlyBudgets'?'master':current);showToast('Đã lưu bản ghi mới')}
+function saveRecord(){const key=window.activeFormKey||current;const schema=formSchemas[key];if(!schema)return;const fd=new FormData(document.getElementById('recordForm'));const obj={};if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(fd.get('type'))){for(const [k,v] of fd.entries())obj[k]=k==='amount'?Number(v||0):v;obj.usedAmount=0;obj.year=Number(obj.year);if(obj.month)obj.month=Number(obj.month);if(obj.quarter)obj.quarter=Number(obj.quarter);}else{schema.forEach(f=>obj[f[0]]=f[2]==='number'?Number(fd.get(f[0])||0):fd.get(f[0]));}if(!obj.name){showToast('Vui lòng nhập tên hoặc nội dung');return}if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)&&!obj.amount){showToast('Vui lòng nhập số tiền ngân sách');return}const prefixes={discounts:'CK',programs:'CT',expenses:'CP',documents:'HS',registrations:'QT',monthlyBudgets:'NS-T'};obj.id=key==='monthlyBudgets'?`NS-T${String(obj.month).padStart(2,'0')}-${obj.year}`:`${prefixes[key]}-${Date.now().toString().slice(-6)}`;if(key==='documents'&&obj.updated)obj.updated=new Date(obj.updated).toLocaleDateString('vi-VN');if(key==='monthlyBudgets'){const existing=state.monthlyBudgets.findIndex(x=>x.month===obj.month&&x.year===obj.year);if(existing>=0)state.monthlyBudgets[existing]=obj;else state.monthlyBudgets.push(obj);state.monthlyBudgets.sort((a,b)=>a.year-b.year||a.month-b.month)}else if(key==='registrations'){obj.approvalTotal=2;obj.approvalStep=obj.status==='Tạo mới'||obj.status==='Chờ phê duyệt'?0:2;state.approvals.unshift(obj);}else state[key].unshift(obj);persist();closeModal();go(key==='monthlyBudgets'?'master':current);showToast('Đã lưu bản ghi mới')}
 function removeItem(key,id){state[key]=state[key].filter(x=>x.id!==id);persist();go(current);showToast('Đã xóa bản ghi')}
 function advanceProcess(id){const x=state.approvals.find(i=>i.id===id);if(!x)return;
  if(x.status==='Tạo mới'){x.status='Chờ phê duyệt';x.approvalStep=0;}
- else if(x.status==='Chờ phê duyệt'){x.approvalTotal=x.approvalTotal||1;x.approvalStep=(x.approvalStep||0)+1;if(x.approvalStep>=x.approvalTotal)x.status='Đã phê duyệt';}
+ else if(x.status==='Chờ phê duyệt'){
+  x.approvalTotal=x.approvalTotal||2;x.approvalStep=(x.approvalStep||0)+1;
+  if(x.approvalStep>=x.approvalTotal)x.status=['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)?'Đang thực hiện':'Đã phê duyệt';
+ }
+ else if(['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)&&x.status==='Đang thực hiện'){
+  x.usedAmount=x.amount;x.status='Hoàn thành';x.completionReason='Đã sử dụng hết ngân sách';
+ }
  else if(x.status==='Đã phê duyệt')x.status='Đang thực hiện';
  else if(x.status==='Đang thực hiện')x.status='Chờ bổ sung tài liệu';
  else if(x.status==='Chờ bổ sung tài liệu')x.status='Hoàn thành';
- persist();go('registrations');showToast('Đã cập nhật trạng thái quy trình')}
+ persist();go('registrations');showToast(['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)&&x.status==='Đang thực hiện'?'Ngân sách đã được phê duyệt và chuyển sang đang thực hiện':'Đã cập nhật trạng thái quy trình')}
 
 function incrementMaster(key){state.master[key]++;persist();go('master');showToast('Đã thêm dữ liệu mẫu')}
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='salescost-data.json';a.click();URL.revokeObjectURL(a.href);showToast('Đã xuất dữ liệu JSON')}
