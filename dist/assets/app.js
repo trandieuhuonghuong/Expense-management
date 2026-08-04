@@ -1,4 +1,4 @@
-const STORAGE_KEY='salescost-pro-v5';
+const STORAGE_KEY='salescost-pro-v6';
 const navItems=[
  ['dashboard','▦','Tổng quan'],['master','◫','Dữ liệu gốc'],['expenses','💳','Chi phí'],['registrations','⇄','Quy trình'],['documents','📁','Tài liệu'],['reports','📊','Báo cáo'],['settings','⚙','Cấu hình']
 ];
@@ -33,18 +33,26 @@ const seed={
   {id:'HS-1004',name:'Hình ảnh trưng bày - Đại lý An Khang.zip',type:'Hình ảnh minh chứng',expenseType:'Hội chợ',ref:'CT-2026-018',updated:'01/08/2026',status:'Thiếu thông tin',completedDocs:4}
  ],
  approvals:[
-  {id:'QT-NS-0812',type:'Ngân sách',name:'Ngân sách tháng 9/2026',requester:'Nguyễn Minh Anh',department:'Kinh doanh miền Nam',periodType:'Tháng',month:9,year:2026,managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:1200000000,usedAmount:0,status:'Chờ phê duyệt',approvalStep:0,approvalTotal:2},
-  {id:'QT-DCNS-0813',type:'Điều chỉnh ngân sách',name:'Điều chỉnh tăng ngân sách tháng 8/2026',requester:'Trần Diệu Hương',department:'Bộ phận Kinh doanh',periodType:'Tháng',month:8,year:2026,adjustmentType:'Tăng ngân sách',budgetRef:'NS-T08-2026',reason:'Bổ sung ngân sách hội chợ cuối tháng',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:150000000,usedAmount:0,status:'Chờ phê duyệt',approvalStep:1,approvalTotal:2},
-  {id:'QT-CKPP-0811',type:'Chiết khấu nhà phân phối',name:'Chiết khấu doanh số NPP quý III',requester:'Trần Hoàng Long',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:280000000,status:'Chờ phê duyệt',approvalStep:1,approvalTotal:2},
-  {id:'QT-CKBH-0810',type:'Chiết khấu bán hàng',name:'Chiết khấu bán hàng tháng 8',requester:'Lê Thùy Dương',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:168000000,status:'Đã phê duyệt',approvalStep:2,approvalTotal:2},
-  {id:'QT-TNPP-0809',type:'Thưởng nhà phân phối',name:'Thưởng NPP đạt chỉ tiêu quý II',requester:'Phạm Tuấn Kiệt',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:360000000,status:'Đang thực hiện',approvalStep:2,approvalTotal:2},
-  {id:'QT-HC-0808',type:'Hội chợ',name:'Tham gia hội chợ Vietfood 2026',requester:'Hoàng Ngọc Mai',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:245000000,status:'Chờ bổ sung tài liệu',approvalStep:2,approvalTotal:2},
-  {id:'QT-HC-0807',type:'Hội chợ',name:'Hội chợ sản phẩm miền Bắc',requester:'Vũ Thanh Hà',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:185000000,status:'Hoàn thành',approvalStep:2,approvalTotal:2}
+  {id:'QT-NS-0812',type:'Ngân sách',name:'Ngân sách tháng 9/2026',requester:'Nguyễn Minh Anh',department:'Kinh doanh miền Nam',category:'Chiết khấu nhà phân phối',periodType:'Tháng',month:9,year:2026,managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:1200000000,usedAmount:0,status:'Chờ phê duyệt',approvalStep:0,approvalTotal:2},
+  {id:'QT-DCNS-0813',type:'Điều chỉnh ngân sách',name:'Điều chỉnh tăng ngân sách tháng 8/2026',requester:'Trần Diệu Hương',department:'Bộ phận Kinh doanh',category:'Hội chợ',periodType:'Tháng',month:8,year:2026,adjustmentType:'Tăng ngân sách',budgetRef:'NS-T08-2026',reason:'Bổ sung ngân sách hội chợ cuối tháng',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:150000000,usedAmount:0,status:'Chờ phê duyệt',approvalStep:1,approvalTotal:2},
+  {id:'QT-CKPP-0811',type:'Chiết khấu nhà phân phối',budgetRef:'NS-HM-CKPP-T08-2026',category:'Chiết khấu nhà phân phối',periodType:'Tháng',month:8,year:2026,name:'Chiết khấu doanh số NPP quý III',requester:'Trần Hoàng Long',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:280000000,status:'Chờ phê duyệt',approvalStep:1,approvalTotal:2},
+  {id:'QT-CKBH-0810',type:'Chiết khấu bán hàng',budgetRef:'NS-HM-CKBH-T08-2026',category:'Chiết khấu bán hàng',periodType:'Tháng',month:8,year:2026,name:'Chiết khấu bán hàng tháng 8',requester:'Lê Thùy Dương',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:168000000,status:'Đã phê duyệt',approvalStep:2,approvalTotal:2},
+  {id:'QT-TNPP-0809',type:'Thưởng nhà phân phối',budgetRef:'NS-HM-TNPP-Q3-2026',category:'Thưởng nhà phân phối',periodType:'Quý',quarter:3,year:2026,name:'Thưởng NPP đạt chỉ tiêu quý II',requester:'Phạm Tuấn Kiệt',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:360000000,status:'Đang thực hiện',approvalStep:2,approvalTotal:2},
+  {id:'QT-HC-0808',type:'Hội chợ',budgetRef:'NS-HM-HC-T08-2026',category:'Hội chợ',periodType:'Tháng',month:8,year:2026,name:'Tham gia hội chợ Vietfood 2026',requester:'Hoàng Ngọc Mai',managerApprover:'Nguyễn Văn Nam',financeApprover:'Trần Thu Hà',amount:245000000,status:'Chờ bổ sung tài liệu',approvalStep:2,approvalTotal:2},
+  {id:'QT-HC-0807',type:'Hội chợ',budgetRef:'NS-HM-HC-Q2-2026',category:'Hội chợ',periodType:'Quý',quarter:2,year:2026,name:'Hội chợ sản phẩm miền Bắc',requester:'Vũ Thanh Hà',managerApprover:'Phạm Quốc Huy',financeApprover:'Lê Mai Anh',amount:185000000,status:'Hoàn thành',approvalStep:2,approvalTotal:2}
  ],
  budgets:[
   {id:'NS-2026-SOUTH',name:'Ngân sách miền Nam',planned:4200000000,approved:3900000000,used:2750000000,owner:'Kinh doanh miền Nam'},
   {id:'NS-2026-NORTH',name:'Ngân sách miền Bắc',planned:3600000000,approved:3350000000,used:2210000000,owner:'Kinh doanh miền Bắc'},
   {id:'NS-2026-CENTRAL',name:'Ngân sách miền Trung',planned:2200000000,approved:2050000000,used:1260000000,owner:'Kinh doanh miền Trung'}
+ ],
+ categoryBudgets:[
+  {id:'NS-HM-CKPP-T08-2026',department:'Kinh doanh miền Nam',category:'Chiết khấu nhà phân phối',periodType:'Tháng',month:8,year:2026,approved:520000000,used:280000000,status:'Đang thực hiện'},
+  {id:'NS-HM-CKBH-T08-2026',department:'Kinh doanh miền Nam',category:'Chiết khấu bán hàng',periodType:'Tháng',month:8,year:2026,approved:260000000,used:168000000,status:'Đang thực hiện'},
+  {id:'NS-HM-HC-T08-2026',department:'Bộ phận Kinh doanh',category:'Hội chợ',periodType:'Tháng',month:8,year:2026,approved:300000000,used:245000000,status:'Đang thực hiện'},
+  {id:'NS-HM-TNPP-Q3-2026',department:'Kinh doanh miền Bắc',category:'Thưởng nhà phân phối',periodType:'Quý',quarter:3,year:2026,approved:700000000,used:360000000,status:'Đang thực hiện'},
+  {id:'NS-HM-HC-Q2-2026',department:'Kinh doanh miền Bắc',category:'Hội chợ',periodType:'Quý',quarter:2,year:2026,approved:260000000,used:185000000,status:'Đã chốt'},
+  {id:'NS-HM-CKPP-N2026',department:'Kinh doanh toàn quốc',category:'Chiết khấu nhà phân phối',periodType:'Năm',year:2026,approved:2400000000,used:1120000000,status:'Đang thực hiện'}
  ],
  monthlyBudgets:[
   {id:'NS-T01-2026',month:1,year:2026,planned:850000000,approved:820000000,used:480000000,status:'Đã chốt'},
@@ -64,11 +72,11 @@ const seed={
 };
 let state=load();let current='dashboard';
 const app=document.getElementById('app'),nav=document.getElementById('nav'),pageTitle=document.getElementById('pageTitle'),sidebar=document.getElementById('sidebar');
-function load(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));if(!saved)return structuredClone(seed);return {...structuredClone(seed),...saved,monthlyBudgets:Array.isArray(saved.monthlyBudgets)?saved.monthlyBudgets:structuredClone(seed.monthlyBudgets)}}catch{return structuredClone(seed)}}
+function load(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));if(!saved)return structuredClone(seed);return {...structuredClone(seed),...saved,monthlyBudgets:Array.isArray(saved.monthlyBudgets)?saved.monthlyBudgets:structuredClone(seed.monthlyBudgets),categoryBudgets:Array.isArray(saved.categoryBudgets)?saved.categoryBudgets:structuredClone(seed.categoryBudgets)}}catch{return structuredClone(seed)}}
 function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 const money=v=>new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND',maximumFractionDigits:0}).format(v);
 function badge(s){let c=s.includes('Đã')?'green':s.includes('Thiếu')||s.includes('Sắp')?'orange':s.includes('Chờ')?'yellow':'blue';return `<span class="status ${c}">${s}</span>`}
-function table(headers,rows){return `<div class="panel table-wrap"><div class="toolbar"><div class="toolbar-left"><button class="chip active">Tất cả</button><button class="chip">Đang xử lý</button><button class="chip">Đã hoàn thành</button></div></div><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.join(''):`<tr><td colspan="99" class="empty">Chưa có dữ liệu</td></tr>`}</tbody></table></div>`}
+function table(headers,rows){return (isBudget?categoryBudgetTable():'')+`<div class="panel table-wrap"><div class="toolbar"><div class="toolbar-left"><button class="chip active">Tất cả</button><button class="chip">Đang xử lý</button><button class="chip">Đã hoàn thành</button></div></div><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.join(''):`<tr><td colspan="99" class="empty">Chưa có dữ liệu</td></tr>`}</tbody></table></div>`}
 function summary(items){return `<div class="summary panel">${items.map(x=>`<div><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>`}
 function dashboard(){const month=state.monthlyBudgets.find(x=>x.month===8&&x.year===2026)||state.monthlyBudgets[0];const pending=state.approvals.filter(x=>x.status==='Chờ phê duyệt');const annual={budget:12800000000,approved:8460000000,used:6920000000};annual.remaining=annual.budget-annual.used;annual.pending=pending.reduce((sum,x)=>sum+x.amount,0);const monthly={budget:month.planned,approved:month.approved,used:month.used,remaining:month.planned-month.used,pending:210000000};const metric=(icon,label,value,note)=>`<div class="card"><div class="icon">${icon}</div><label>${label}</label><strong>${money(value)}</strong><small>${note}</small></div>`;return `<div class="hero"><div><small>THÁNG 8/2026</small><h2>Chào buổi sáng, Diệu Hương</h2><p>Bạn có <b>${pending.length} đề nghị</b> đang chờ phê duyệt và <b>${state.documents.filter(x=>x.status.includes('Thiếu')).length} tài liệu</b> cần bổ sung.</p></div><button class="btn" onclick="go('registrations')">Xem việc cần xử lý →</button></div>
 <div class="budget-kpi-board">
@@ -116,6 +124,12 @@ function syncBudgetStatuses(){
  });
  if(changed)persist();
 }
+
+const budgetCategories=['Chiết khấu nhà phân phối','Chiết khấu bán hàng','Thưởng nhà phân phối','Hội chợ','Hỗ trợ thị trường','Khuyến mại','Khác'];
+function budgetPeriodLabel(x){if(x.periodType==='Tháng')return `Tháng ${x.month}/${x.year}`;if(x.periodType==='Quý')return `Quý ${x.quarter}/${x.year}`;return `Năm ${x.year}`}
+function categoryBudgetRemaining(x){return Math.max(0,Number(x.approved||0)-Number(x.used||0))}
+function eligibleBudgets(type){return state.categoryBudgets.filter(x=>x.category===type&&categoryBudgetRemaining(x)>0&&x.status!=='Đã chốt')}
+function categoryBudgetTable(){return `<div class="panel table-wrap category-budget-table"><div class="panel-head"><div><h3>Ngân sách theo hạng mục</h3><p>Kiểm soát ngân sách theo bộ phận, kỳ tháng/quý/năm và từng loại chi phí.</p></div></div><table><thead><tr><th>Mã ngân sách</th><th>Bộ phận</th><th>Hạng mục</th><th>Kỳ ngân sách</th><th>Được duyệt</th><th>Đã sử dụng</th><th>Còn lại</th><th>Trạng thái</th></tr></thead><tbody>${state.categoryBudgets.map(x=>`<tr><td><b>${x.id}</b></td><td>${x.department}</td><td><b>${x.category}</b></td><td>${budgetPeriodLabel(x)}</td><td>${money(x.approved)}</td><td>${money(x.used)}</td><td><b>${money(categoryBudgetRemaining(x))}</b></td><td>${badge(x.status)}</td></tr>`).join('')}</tbody></table></div>`}
 let registrationFlow='budget';
 let budgetFlow='registration';
 const expenseTypes=['Chiết khấu nhà phân phối','Chiết khấu bán hàng','Thưởng nhà phân phối','Hội chợ'];
@@ -127,7 +141,7 @@ function registrations(){
  const budgetType=budgetFlow==='registration'?'Ngân sách':'Điều chỉnh ngân sách';
  const records=state.approvals.filter(x=>isBudget?x.type===budgetType:!['Ngân sách','Điều chỉnh ngân sách'].includes(x.type));
  const types=isBudget?['Tất cả',budgetType]:['Tất cả',...expenseTypes];
- const rows=records.map(x=>{const action=processActionLabel(x);return `<tr data-reg-type="${x.type||''}"><td><b>${x.name}</b><span>${x.id}${x.budgetRef?` · ${x.budgetRef}`:''}</span></td><td>${isBudget?`<b>${x.department||'Chưa xác định'}</b><span>${x.periodType||'Ngân sách'}${x.adjustmentType?` · ${x.adjustmentType}`:''}</span>`:(x.type||'Khác')}</td><td>${approvalTimeline(x)}</td><td><b>${money(x.amount)}</b>${x.reason?`<span>${x.reason}</span>`:''}</td><td>${badge(x.status)}</td><td>${action?`<button class="link-btn" onclick="advanceProcess('${x.id}')">${action}</button>`:'—'}</td></tr>`});
+ const rows=records.map(x=>{const action=processActionLabel(x);return `<tr data-reg-type="${x.type||''}"><td><b>${x.name}</b><span>${x.id}${x.budgetRef?` · ${x.budgetRef}`:''}</span></td><td>${isBudget?`<b>${x.department||'Chưa xác định'}</b><span>${x.category||'Chưa chọn hạng mục'} · ${x.periodType||'Ngân sách'}${x.adjustmentType?` · ${x.adjustmentType}`:''}</span>`:`<b>${x.type||'Khác'}</b><span>${x.budgetRef||'Chưa liên kết ngân sách'}</span>`}</td><td>${approvalTimeline(x)}</td><td><b>${money(x.amount)}</b>${x.reason?`<span>${x.reason}</span>`:''}</td><td>${badge(x.status)}</td><td>${action?`<button class="link-btn" onclick="advanceProcess('${x.id}')">${action}</button>`:'—'}</td></tr>`});
  const cards=isBudget
  ? `<div class="registration-types">${budgetFlow==='registration'?`<button class="type-card" onclick="openBudgetRegistrationModal()"><span>◎</span><b>Đăng ký ngân sách</b><small>＋ Tạo đề nghị ngân sách mới</small></button>`:`<button class="type-card" onclick="openBudgetAdjustmentModal()"><span>↕</span><b>Điều chỉnh ngân sách</b><small>＋ Tạo đề nghị tăng hoặc giảm ngân sách</small></button>`}</div>`
  : `<div class="registration-types compact">${expenseTypes.map((x,i)=>`<button class="type-card" onclick="openRegistrationModal('${x}')"><span>${['%','↘','★','◆'][i]}</span><b>${x}</b><small>＋ Tạo đăng ký chi phí</small></button>`).join('')}</div>`;
@@ -186,6 +200,7 @@ function openBudgetRegistrationModal(){
   <input type="hidden" name="status" value="Tạo mới">
   <div class="field"><label>Người nộp đơn<select name="requester">${people.map(x=>`<option ${x==='Trần Diệu Hương'?'selected':''}>${x}</option>`).join('')}</select></label></div>
   <div class="field"><label>Bộ phận<input name="department" type="text" readonly></label></div>
+  <div class="field"><label>Hạng mục ngân sách<select name="category">${budgetCategories.map(x=>`<option>${x}</option>`).join('')}</select></label></div>
   <div class="field"><label>Kỳ ngân sách<select name="periodType"><option>Tháng</option><option>Quý</option><option>Năm</option></select></label></div>
   <div class="field"><label>Số tiền ngân sách<input name="amount" type="number" min="0" required></label></div>
   <div id="budgetPeriodFields" class="budget-period-fields full"></div>
@@ -202,13 +217,15 @@ function openBudgetAdjustmentModal(){
  document.getElementById('modalTitle').textContent='Tạo điều chỉnh ngân sách';
  document.getElementById('modalHint').textContent='Chọn ngân sách cần điều chỉnh, hình thức tăng/giảm và nêu rõ lý do.';
  const people=Object.keys(requesterDepartments);
- const budgetOptions=state.monthlyBudgets.map(x=>`<option value="${x.id}" data-month="${x.month}" data-year="${x.year}">${x.id} — Tháng ${x.month}/${x.year}</option>`).join('');
+ const budgetOptions=state.categoryBudgets.map(x=>`<option value="${x.id}" data-month="${x.month||''}" data-quarter="${x.quarter||''}" data-year="${x.year}" data-period="${x.periodType}" data-category="${x.category}">${x.id} — ${x.category} — ${budgetPeriodLabel(x)} — Còn ${money(categoryBudgetRemaining(x))}</option>`).join('');
  document.getElementById('recordForm').innerHTML=`
   <input type="hidden" name="type" value="Điều chỉnh ngân sách">
   <input type="hidden" name="managerApprover" value="Nguyễn Văn Nam">
   <input type="hidden" name="financeApprover" value="Trần Thu Hà">
   <input type="hidden" name="status" value="Tạo mới">
   <input type="hidden" name="periodType" value="Tháng">
+  <input type="hidden" name="category" value="">
+  <input type="hidden" name="quarter" value="">
   <input type="hidden" name="month" value="8">
   <input type="hidden" name="year" value="2026">
   <div class="field"><label>Người nộp đơn<select name="requester">${people.map(x=>`<option ${x==='Trần Diệu Hương'?'selected':''}>${x}</option>`).join('')}</select></label></div>
@@ -222,13 +239,27 @@ function openBudgetAdjustmentModal(){
  const requester=f.querySelector('[name="requester"]');
  const ref=f.querySelector('[name="budgetRef"]');
  const kind=f.querySelector('[name="adjustmentType"]');
- const update=()=>{updateBudgetRequester();const opt=ref.selectedOptions[0];f.querySelector('[name="month"]').value=opt?.dataset.month||8;f.querySelector('[name="year"]').value=opt?.dataset.year||2026;f.querySelector('[name="name"]').value=`Điều chỉnh ${kind.value.toLowerCase()} tháng ${opt?.dataset.month||8}/${opt?.dataset.year||2026}`};
+ const update=()=>{updateBudgetRequester();const opt=ref.selectedOptions[0];f.querySelector('[name="periodType"]').value=opt?.dataset.period||'Tháng';f.querySelector('[name="category"]').value=opt?.dataset.category||'';f.querySelector('[name="month"]').value=opt?.dataset.month||'';f.querySelector('[name="quarter"]').value=opt?.dataset.quarter||'';f.querySelector('[name="year"]').value=opt?.dataset.year||2026;const label=opt?`${opt.dataset.period==='Tháng'?`tháng ${opt.dataset.month}/${opt.dataset.year}`:opt.dataset.period==='Quý'?`quý ${opt.dataset.quarter}/${opt.dataset.year}`:`năm ${opt.dataset.year}`}`:'';f.querySelector('[name="name"]').value=`Điều chỉnh ${kind.value.toLowerCase()} ${opt?.dataset.category||''} ${label}`};
  requester.addEventListener('change',update);ref.addEventListener('change',update);kind.addEventListener('change',update);update();
  document.getElementById('modalBackdrop').style.display='grid';
 }
 function openRegistrationModal(type=''){
  if(registrationFlow==='budget'||type==='Ngân sách'){budgetFlow==='adjustment'?openBudgetAdjustmentModal():openBudgetRegistrationModal();return}
- openModal('registrations');const el=document.querySelector('#recordForm select[name="type"]');if(el){el.value=type||'Chiết khấu nhà phân phối'}document.getElementById('modalTitle').textContent='Tạo đăng ký chi phí';document.getElementById('modalHint').textContent='Nhập thông tin đăng ký chi phí và người phê duyệt.'
+ window.activeFormKey='registrations';
+ document.getElementById('modalTitle').textContent='Tạo đăng ký chi phí';
+ document.getElementById('modalHint').textContent='Khoản chi phải liên kết đúng ngân sách hạng mục và không được vượt số dư của kỳ tháng, quý hoặc năm.';
+ const chosen=type||expenseTypes[0];
+ const renderBudgetOptions=(t)=>eligibleBudgets(t).map(x=>`<option value="${x.id}">${x.id} — ${budgetPeriodLabel(x)} — Còn ${money(categoryBudgetRemaining(x))}</option>`).join('');
+ document.getElementById('recordForm').innerHTML=`
+  <input type="hidden" name="managerApprover" value="Nguyễn Văn Nam"><input type="hidden" name="financeApprover" value="Trần Thu Hà"><input type="hidden" name="status" value="Tạo mới">
+  <div class="field"><label>Loại chi phí<select name="type">${expenseTypes.map(x=>`<option ${x===chosen?'selected':''}>${x}</option>`).join('')}</select></label></div>
+  <div class="field"><label>Người tạo đơn<input name="requester" value="Trần Diệu Hương" readonly></label></div>
+  <div class="field full"><label>Ngân sách liên kết<select name="budgetRef"></select></label><small id="budgetBalanceHint"></small></div>
+  <div class="field full"><label>Nội dung chi phí<input name="name" required></label></div>
+  <div class="field"><label>Số tiền chi phí<input name="amount" type="number" min="1" required></label></div>`;
+ const f=document.getElementById('recordForm'),typeEl=f.querySelector('[name="type"]'),ref=f.querySelector('[name="budgetRef"]'),amount=f.querySelector('[name="amount"]'),hint=f.querySelector('#budgetBalanceHint');
+ const refresh=()=>{ref.innerHTML=renderBudgetOptions(typeEl.value)||'<option value="">Không có ngân sách phù hợp còn số dư</option>';const b=state.categoryBudgets.find(x=>x.id===ref.value);hint.textContent=b?`Kỳ ${budgetPeriodLabel(b)} · Hạng mục ${b.category} · Còn lại ${money(categoryBudgetRemaining(b))}`:'Cần đăng ký hoặc điều chỉnh ngân sách trước khi tạo chi phí.';amount.max=b?categoryBudgetRemaining(b):0};
+ typeEl.addEventListener('change',refresh);ref.addEventListener('change',refresh);refresh();document.getElementById('modalBackdrop').style.display='grid';
 }
 const documentRequirements={
  'Chiết khấu nhà phân phối':['Đề nghị chiết khấu','Chính sách/Phụ lục chiết khấu','Bảng doanh số đối soát','Biên bản xác nhận với nhà phân phối','Hóa đơn hoặc chứng từ cấn trừ'],
@@ -266,13 +297,13 @@ const formSchemas={
 function openModal(forcedKey){let key=forcedKey||current;window.activeFormKey=key;if(!formSchemas[key]){showToast('Trang này chưa hỗ trợ tạo mới trong bản demo');return}const schema=formSchemas[key];document.getElementById('modalTitle').textContent=key==='monthlyBudgets'?'Thêm ngân sách tháng':`Tạo ${navItems.find(x=>x[0]===key)[2]}`;document.getElementById('recordForm').innerHTML=schema.map(f=>`<div class="field ${f[0]==='name'?'full':''}"><label>${f[1]}${f[2]==='select'?`<select name="${f[0]}">${f[3].map(o=>`<option>${o}</option>`).join('')}</select>`:`<input name="${f[0]}" type="${f[2]}" required>`}</label></div>`).join('');document.getElementById('modalBackdrop').style.display='grid'}
 function openMonthlyBudgetModal(){openModal('monthlyBudgets')}
 function closeModal(){document.getElementById('modalBackdrop').style.display='none';window.activeFormKey=null}
-function saveRecord(){const key=window.activeFormKey||current;const schema=formSchemas[key];if(!schema)return;const fd=new FormData(document.getElementById('recordForm'));const obj={};if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(fd.get('type'))){for(const [k,v] of fd.entries())obj[k]=k==='amount'?Number(v||0):v;obj.usedAmount=0;obj.year=Number(obj.year);if(obj.month)obj.month=Number(obj.month);if(obj.quarter)obj.quarter=Number(obj.quarter);}else{schema.forEach(f=>obj[f[0]]=f[2]==='number'?Number(fd.get(f[0])||0):fd.get(f[0]));}if(!obj.name){showToast('Vui lòng nhập tên hoặc nội dung');return}if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)&&!obj.amount){showToast('Vui lòng nhập số tiền ngân sách');return}const prefixes={discounts:'CK',programs:'CT',expenses:'CP',documents:'HS',registrations:'QT',monthlyBudgets:'NS-T'};obj.id=key==='monthlyBudgets'?`NS-T${String(obj.month).padStart(2,'0')}-${obj.year}`:`${prefixes[key]}-${Date.now().toString().slice(-6)}`;if(key==='documents'&&obj.updated)obj.updated=new Date(obj.updated).toLocaleDateString('vi-VN');if(key==='monthlyBudgets'){const existing=state.monthlyBudgets.findIndex(x=>x.month===obj.month&&x.year===obj.year);if(existing>=0)state.monthlyBudgets[existing]=obj;else state.monthlyBudgets.push(obj);state.monthlyBudgets.sort((a,b)=>a.year-b.year||a.month-b.month)}else if(key==='registrations'){obj.approvalTotal=2;obj.approvalStep=obj.status==='Tạo mới'||obj.status==='Chờ phê duyệt'?0:2;state.approvals.unshift(obj);}else state[key].unshift(obj);persist();closeModal();go(key==='monthlyBudgets'?'master':current);showToast('Đã lưu bản ghi mới')}
+function saveRecord(){const key=window.activeFormKey||current;const schema=formSchemas[key];if(!schema)return;const fd=new FormData(document.getElementById('recordForm'));const obj={};if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(fd.get('type'))){for(const [k,v] of fd.entries())obj[k]=k==='amount'?Number(v||0):v;obj.usedAmount=0;obj.year=Number(obj.year);if(obj.month)obj.month=Number(obj.month);if(obj.quarter)obj.quarter=Number(obj.quarter);}else{schema.forEach(f=>obj[f[0]]=f[2]==='number'?Number(fd.get(f[0])||0):fd.get(f[0]));}if(!obj.name){showToast('Vui lòng nhập tên hoặc nội dung');return}if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)&&!obj.amount){showToast('Vui lòng nhập số tiền ngân sách');return}if(key==='registrations'&&!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(!b){showToast('Không có ngân sách hạng mục phù hợp. Vui lòng đăng ký hoặc điều chỉnh ngân sách trước.');return}const remain=categoryBudgetRemaining(b);if(obj.amount>remain){showToast(`Chi phí vượt ngân sách còn lại ${money(remain)} của ${budgetPeriodLabel(b)} — ${b.category}`);return}obj.category=b.category;obj.department=b.department;obj.periodType=b.periodType;obj.month=b.month||'';obj.quarter=b.quarter||'';obj.year=b.year;}const prefixes={discounts:'CK',programs:'CT',expenses:'CP',documents:'HS',registrations:'QT',monthlyBudgets:'NS-T'};obj.id=key==='monthlyBudgets'?`NS-T${String(obj.month).padStart(2,'0')}-${obj.year}`:`${prefixes[key]}-${Date.now().toString().slice(-6)}`;if(key==='documents'&&obj.updated)obj.updated=new Date(obj.updated).toLocaleDateString('vi-VN');if(key==='monthlyBudgets'){const existing=state.monthlyBudgets.findIndex(x=>x.month===obj.month&&x.year===obj.year);if(existing>=0)state.monthlyBudgets[existing]=obj;else state.monthlyBudgets.push(obj);state.monthlyBudgets.sort((a,b)=>a.year-b.year||a.month-b.month)}else if(key==='registrations'){obj.approvalTotal=2;obj.approvalStep=obj.status==='Tạo mới'||obj.status==='Chờ phê duyệt'?0:2;state.approvals.unshift(obj);if(!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(b)b.used=Number(b.used||0)+Number(obj.amount||0);}}else state[key].unshift(obj);persist();closeModal();go(key==='monthlyBudgets'?'master':current);showToast('Đã lưu bản ghi mới')}
 function removeItem(key,id){state[key]=state[key].filter(x=>x.id!==id);persist();go(current);showToast('Đã xóa bản ghi')}
 function advanceProcess(id){const x=state.approvals.find(i=>i.id===id);if(!x)return;
  if(x.status==='Tạo mới'){x.status='Chờ phê duyệt';x.approvalStep=0;}
  else if(x.status==='Chờ phê duyệt'){
   x.approvalTotal=x.approvalTotal||2;x.approvalStep=(x.approvalStep||0)+1;
-  if(x.approvalStep>=x.approvalTotal)x.status=['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)?'Đang thực hiện':'Đã phê duyệt';
+  if(x.approvalStep>=x.approvalTotal){x.status=['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)?'Đang thực hiện':'Đã phê duyệt';if(x.type==='Ngân sách'&&!x.budgetCreated){const code=x.periodType==='Tháng'?`T${String(x.month).padStart(2,'0')}`:x.periodType==='Quý'?`Q${x.quarter}`:'N';const catCode=(x.category||'Khác').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z]/g,'').slice(0,6).toUpperCase();const id=`NS-HM-${catCode}-${code}-${x.year}`;if(!state.categoryBudgets.some(i=>i.id===id))state.categoryBudgets.unshift({id,department:x.department,category:x.category||'Khác',periodType:x.periodType,month:x.month||'',quarter:x.quarter||'',year:x.year,approved:Number(x.amount||0),used:0,status:'Đang thực hiện'});x.budgetCreated=true;}if(x.type==='Điều chỉnh ngân sách'&&!x.adjustmentApplied){const b=state.categoryBudgets.find(i=>i.id===x.budgetRef);if(b){if(x.adjustmentType==='Tăng ngân sách')b.approved+=Number(x.amount||0);else if(x.adjustmentType==='Giảm ngân sách'){if(Number(x.amount||0)>categoryBudgetRemaining(b)){x.status='Chờ phê duyệt';x.approvalStep=x.approvalTotal-1;showToast('Không thể giảm vượt phần ngân sách còn lại');return}b.approved-=Number(x.amount||0);}x.adjustmentApplied=true;}}}
  }
  else if(['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)&&x.status==='Đang thực hiện'){
   x.usedAmount=x.amount;x.status='Hoàn thành';x.completionReason='Đã sử dụng hết ngân sách';

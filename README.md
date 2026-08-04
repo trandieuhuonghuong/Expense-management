@@ -1,28 +1,23 @@
-# SalesCost Pro – Bản tách luồng ngân sách và chi phí
+# SalesCost Pro – Ngân sách theo hạng mục
 
-Bản cập nhật gồm hai luồng nghiệp vụ độc lập trong module Quy trình:
+Bản cập nhật bổ sung kiểm soát ngân sách theo hạng mục và liên kết bắt buộc giữa chi phí với ngân sách.
 
-- Đăng ký ngân sách
-- Đăng ký chi phí
+## Chức năng mới
 
-Module Tài liệu có danh mục hồ sơ bắt buộc riêng cho từng loại chi phí: chiết khấu nhà phân phối, chiết khấu bán hàng, thưởng nhà phân phối và hội chợ.
+- Ngân sách được quản lý theo bộ phận, hạng mục và kỳ tháng/quý/năm.
+- Luồng đăng ký ngân sách yêu cầu chọn hạng mục.
+- Luồng điều chỉnh ngân sách chọn trực tiếp ngân sách hạng mục cần tăng/giảm.
+- Đăng ký chi phí bắt buộc chọn ngân sách tương ứng.
+- Chỉ hiển thị ngân sách cùng loại chi phí còn số dư.
+- Không cho lưu chi phí vượt số dư ngân sách của tháng/quý/năm và hạng mục tương ứng.
+- Khi tạo chi phí, số tiền được ghi nhận vào phần đã sử dụng của ngân sách liên kết.
 
 ## Chạy thử
-Mở trực tiếp `index.html` hoặc chạy `npm run dev`.
 
-## Triển khai Vercel
-- Framework Preset: Other
-- Build Command: `npm run build`
-- Output Directory: `dist`
+Mở `index.html` hoặc chạy:
 
-## Cập nhật luồng đăng ký ngân sách
-- Ngân sách được phân theo bộ phận.
-- Người nộp đơn mặc định là Trần Diệu Hương; bộ phận tự động lấy theo người nộp đơn.
-- Chọn kỳ ngân sách: Tháng, Quý hoặc Năm.
-- Nội dung tự sinh theo kỳ, ví dụ: Ngân sách tháng 6/2026, Ngân sách quý 2/2026, Ngân sách năm 2027.
+```bash
+npm run build
+```
 
-
-## Cập nhật luồng ngân sách
-- Quy trình được chia thành hai nhóm chính: Ngân sách và Chi phí.
-- Trong Ngân sách có hai luồng độc lập: Đăng ký ngân sách và Điều chỉnh ngân sách.
-- Điều chỉnh ngân sách hỗ trợ tăng, giảm hoặc điều chuyển ngân sách đã được phê duyệt.
+Triển khai Vercel với Output Directory là `dist`.
