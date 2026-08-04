@@ -42,3 +42,20 @@
 .approval-form-step span{grid-row:1/3;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#e3f5f2;color:#0f766e;font-weight:800}
 .approval-form-step b{font-size:14px}.approval-form-step small{display:block;color:#64748b;margin-top:4px;white-space:normal}
 @media(max-width:800px){.budget-item-row{grid-template-columns:1fr}.budget-remove{justify-self:end}.approval-form-steps{flex-direction:column}.approval-form-steps>i{transform:rotate(90deg)}.budget-items-footer{align-items:flex-start;flex-direction:column}}
+/* Refined budget forms */
+.modal{width:min(980px,96vw)}
+.form-grid{padding:24px 28px 28px;gap:20px 22px}
+.form-section-title.first-section{border-top:0;padding-top:0;margin-top:0}
+.form-section-title{margin-top:10px;padding-top:22px;letter-spacing:.1px}
+.field label{display:block;line-height:1.45}
+.field input,.field select,.field textarea{margin-top:9px;min-height:44px;padding:11px 13px;line-height:1.45}
+.field textarea{min-height:104px;resize:vertical}
+.adjustment-items-list{display:grid;gap:14px}
+.adjustment-item-row{display:grid;grid-template-columns:minmax(260px,1.35fr) minmax(190px,.85fr) minmax(180px,.7fr) 44px;gap:14px;align-items:end;padding:16px;border:1px solid #dce4e8;border-radius:12px;background:#fbfdfd}
+.adjustment-item-row .field{margin:0}
+.adjustment-remove{align-self:end}
+.budget-period-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 22px}
+.budget-item-row{padding:16px;gap:14px}
+.approval-form-flow{margin-top:8px;padding-top:24px}
+.modal-actions{padding:18px 28px}
+@media(max-width:850px){.adjustment-item-row{grid-template-columns:1fr}.adjustment-remove{justify-self:end}.budget-period-fields{grid-template-columns:1fr}}

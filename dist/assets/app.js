@@ -270,39 +270,69 @@ function openBudgetRegistrationModal(fromUnified=false){
  updateBudgetRequester();budgetPeriodFields();bindBudgetItemInputs();updateBudgetTotal();
  document.getElementById('modalBackdrop').style.display='grid';
 }
+function adjustmentItemRow(budgetRef='',adjustmentType='Tăng ngân sách',amount=''){
+ const opts=state.categoryBudgets.map(x=>`<option value="${x.id}" ${x.id===budgetRef?'selected':''}>${x.category} — ${budgetPeriodLabel(x)} — Còn ${money(categoryBudgetRemaining(x))}</option>`).join('');
+ return `<div class="adjustment-item-row">
+  <div class="field"><label>Hạng mục ngân sách<select name="adjustmentBudgetRef">${opts}</select></label></div>
+  <div class="field"><label>Hình thức điều chỉnh<select name="adjustmentItemType"><option ${adjustmentType==='Tăng ngân sách'?'selected':''}>Tăng ngân sách</option><option ${adjustmentType==='Giảm ngân sách'?'selected':''}>Giảm ngân sách</option><option ${adjustmentType==='Điều chuyển ngân sách'?'selected':''}>Điều chuyển ngân sách</option></select></label></div>
+  <div class="field"><label>Số tiền điều chỉnh<input name="adjustmentItemAmount" type="number" min="1" value="${amount}" required></label></div>
+  <button type="button" class="icon-btn danger adjustment-remove" title="Xóa hạng mục" onclick="removeAdjustmentItemRow(this)">−</button>
+ </div>`;
+}
+function addAdjustmentItemRow(){
+ const list=document.getElementById('adjustmentItemsList');if(!list)return;
+ list.insertAdjacentHTML('beforeend',adjustmentItemRow());bindAdjustmentItemInputs();updateAdjustmentSummary();
+}
+function removeAdjustmentItemRow(btn){
+ const list=document.getElementById('adjustmentItemsList');
+ if(list&&list.children.length<=1){showToast('Điều chỉnh ngân sách phải có ít nhất một hạng mục');return}
+ btn.closest('.adjustment-item-row')?.remove();updateAdjustmentSummary();
+}
+function bindAdjustmentItemInputs(){
+ document.querySelectorAll('#adjustmentItemsList input,#adjustmentItemsList select').forEach(x=>{x.oninput=updateAdjustmentSummary;x.onchange=updateAdjustmentSummary});
+}
+function updateAdjustmentSummary(){
+ const f=document.getElementById('recordForm');if(!f)return;
+ const refs=[...f.querySelectorAll('[name="adjustmentBudgetRef"]')];
+ const types=[...f.querySelectorAll('[name="adjustmentItemType"]')];
+ const amounts=[...f.querySelectorAll('[name="adjustmentItemAmount"]')];
+ const items=refs.map((r,i)=>{const b=state.categoryBudgets.find(x=>x.id===r.value);return {budgetRef:r.value,category:b?.category||'',adjustmentType:types[i]?.value||'',amount:Number(amounts[i]?.value||0)}});
+ const total=items.reduce((a,x)=>a+x.amount,0);
+ const amount=f.querySelector('[name="amount"]');if(amount)amount.value=total;
+ const view=document.getElementById('adjustmentTotalView');if(view)view.textContent=money(total);
+ const name=f.querySelector('[name="name"]');if(name){name.value=items.length===1?`Điều chỉnh ${items[0].adjustmentType.toLowerCase()} ${items[0].category}`:`Điều chỉnh ngân sách ${items.length} hạng mục`;}
+}
 function openBudgetAdjustmentModal(fromUnified=false){
  document.getElementById('saveRecord').style.display='inline-flex';
  window.activeFormKey='registrations';
- document.getElementById('modalTitle').textContent='Tạo điều chỉnh ngân sách';
- document.getElementById('modalHint').textContent='Chọn ngân sách cần điều chỉnh, hình thức tăng/giảm và nêu rõ lý do.';
+ document.getElementById('modalTitle').textContent='Điều chỉnh ngân sách';
+ document.getElementById('modalHint').textContent='Khai báo rõ từng hạng mục cần tăng, giảm hoặc điều chuyển và lý do điều chỉnh.';
  const people=Object.keys(requesterDepartments);
- const budgetOptions=state.categoryBudgets.map(x=>`<option value="${x.id}" data-month="${x.month||''}" data-quarter="${x.quarter||''}" data-year="${x.year}" data-period="${x.periodType}" data-category="${x.category}">${x.id} — ${x.category} — ${budgetPeriodLabel(x)} — Còn ${money(categoryBudgetRemaining(x))}</option>`).join('');
  document.getElementById('recordForm').innerHTML=`
   <input type="hidden" name="type" value="Điều chỉnh ngân sách">
   <input type="hidden" name="managerApprover" value="Nguyễn Văn Nam">
   <input type="hidden" name="financeApprover" value="Trần Thu Hà">
   <input type="hidden" name="status" value="Tạo mới">
-  <input type="hidden" name="periodType" value="Tháng">
-  <input type="hidden" name="category" value="">
-  <input type="hidden" name="quarter" value="">
-  <input type="hidden" name="month" value="8">
-  <input type="hidden" name="year" value="2026">
+  <input type="hidden" name="amount" value="0">
+  <input type="hidden" name="name" value="Điều chỉnh ngân sách">
+  <div class="form-section-title full first-section">I. Thông tin người nộp</div>
   <div class="field"><label>Người nộp đơn<select name="requester">${people.map(x=>`<option ${x==='Trần Diệu Hương'?'selected':''}>${x}</option>`).join('')}</select></label></div>
   <div class="field"><label>Bộ phận<input name="department" type="text" readonly></label></div>
-  <div class="field full"><label>Ngân sách cần điều chỉnh<select name="budgetRef">${budgetOptions}</select></label></div>
-  <div class="field"><label>Hình thức điều chỉnh<select name="adjustmentType"><option>Tăng ngân sách</option><option>Giảm ngân sách</option><option>Điều chuyển ngân sách</option></select></label></div>
-  <div class="field"><label>Số tiền điều chỉnh<input name="amount" type="number" min="1" required></label></div>
-  <div class="field full"><label>Lý do điều chỉnh<textarea name="reason" rows="3" required></textarea></label></div>
-  <div class="field full"><label>Nội dung đăng ký<input name="name" type="text" readonly></label></div>`;
+  <div class="form-section-title full">II. Chi tiết hạng mục điều chỉnh</div>
+  <div id="adjustmentItemsList" class="adjustment-items-list full">${adjustmentItemRow()}</div>
+  <div class="budget-items-footer full"><button type="button" class="btn subtle" onclick="addAdjustmentItemRow()">＋ Thêm hạng mục điều chỉnh</button><div><span>Tổng tiền điều chỉnh</span><strong id="adjustmentTotalView">0 ₫</strong></div></div>
+  <div class="form-section-title full">III. Lý do và nội dung</div>
+  <div class="field full"><label>Lý do điều chỉnh<textarea name="reason" rows="4" placeholder="Nhập rõ nguyên nhân, căn cứ và mục đích điều chỉnh" required></textarea></label></div>
+  <div class="field full"><label>Nội dung đăng ký<input name="displayName" type="text" value="Tự động tổng hợp theo các hạng mục điều chỉnh" readonly></label></div>
+  ${approvalFlowHtml()}`;
  if(fromUnified)prependBudgetTypeSelector('adjustment');
  const f=document.getElementById('recordForm');
  const requester=f.querySelector('[name="requester"]');
- const ref=f.querySelector('[name="budgetRef"]');
- const kind=f.querySelector('[name="adjustmentType"]');
- const update=()=>{updateBudgetRequester();const opt=ref.selectedOptions[0];f.querySelector('[name="periodType"]').value=opt?.dataset.period||'Tháng';f.querySelector('[name="category"]').value=opt?.dataset.category||'';f.querySelector('[name="month"]').value=opt?.dataset.month||'';f.querySelector('[name="quarter"]').value=opt?.dataset.quarter||'';f.querySelector('[name="year"]').value=opt?.dataset.year||2026;const label=opt?`${opt.dataset.period==='Tháng'?`tháng ${opt.dataset.month}/${opt.dataset.year}`:opt.dataset.period==='Quý'?`quý ${opt.dataset.quarter}/${opt.dataset.year}`:`năm ${opt.dataset.year}`}`:'';f.querySelector('[name="name"]').value=`Điều chỉnh ${kind.value.toLowerCase()} ${opt?.dataset.category||''} ${label}`};
- requester.addEventListener('change',update);ref.addEventListener('change',update);kind.addEventListener('change',update);update();
+ requester.addEventListener('change',()=>{updateBudgetRequester();const n=document.getElementById('approvalRequesterName');if(n)n.textContent=requester.value});
+ updateBudgetRequester();bindAdjustmentItemInputs();updateAdjustmentSummary();
  document.getElementById('modalBackdrop').style.display='grid';
 }
+
 function openRegistrationModal(type=''){
  document.getElementById('saveRecord').style.display='inline-flex';
  if(registrationFlow==='budget'||type==='Ngân sách'){openBudgetUnifiedModal();return}
@@ -358,7 +388,7 @@ const formSchemas={
 function openModal(forcedKey){let key=forcedKey||current;window.activeFormKey=key;if(!formSchemas[key]){showToast('Trang này chưa hỗ trợ tạo mới trong bản demo');return}const schema=formSchemas[key];document.getElementById('modalTitle').textContent=key==='monthlyBudgets'?'Thêm ngân sách tháng':`Tạo ${navItems.find(x=>x[0]===key)[2]}`;document.getElementById('recordForm').innerHTML=schema.map(f=>`<div class="field ${f[0]==='name'?'full':''}"><label>${f[1]}${f[2]==='select'?`<select name="${f[0]}">${f[3].map(o=>`<option>${o}</option>`).join('')}</select>`:`<input name="${f[0]}" type="${f[2]}" required>`}</label></div>`).join('');document.getElementById('modalBackdrop').style.display='grid'}
 function openMonthlyBudgetModal(){openModal('monthlyBudgets')}
 function closeModal(){document.getElementById('modalBackdrop').style.display='none';window.activeFormKey=null}
-function saveRecord(){const key=window.activeFormKey||current;const schema=formSchemas[key];if(!schema)return;const fd=new FormData(document.getElementById('recordForm'));const obj={};if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(fd.get('type'))){for(const [k,v] of fd.entries()){if(['budgetItemCategory','budgetItemAmount'].includes(k))continue;obj[k]=k==='amount'?Number(v||0):v;}if(fd.get('type')==='Ngân sách'){const cats=fd.getAll('budgetItemCategory'),amts=fd.getAll('budgetItemAmount').map(v=>Number(v||0));obj.budgetItems=cats.map((category,i)=>({category,amount:amts[i]||0})).filter(x=>x.amount>0);obj.amount=obj.budgetItems.reduce((a,x)=>a+x.amount,0);obj.category=obj.budgetItems.length===1?obj.budgetItems[0].category:`${obj.budgetItems.length} hạng mục`;}obj.usedAmount=0;obj.year=Number(obj.year);if(obj.month)obj.month=Number(obj.month);if(obj.quarter)obj.quarter=Number(obj.quarter);}else{schema.forEach(f=>obj[f[0]]=f[2]==='number'?Number(fd.get(f[0])||0):fd.get(f[0]));}if(!obj.name){showToast('Vui lòng nhập tên hoặc nội dung');return}if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)&&!obj.amount){showToast('Vui lòng nhập ít nhất một hạng mục và số tiền ngân sách');return}if(key==='registrations'&&!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(!b){showToast('Không có ngân sách hạng mục phù hợp. Vui lòng đăng ký hoặc điều chỉnh ngân sách trước.');return}const remain=categoryBudgetRemaining(b);if(obj.amount>remain){showToast(`Chi phí vượt ngân sách còn lại ${money(remain)} của ${budgetPeriodLabel(b)} — ${b.category}`);return}obj.category=b.category;obj.department=b.department;obj.periodType=b.periodType;obj.month=b.month||'';obj.quarter=b.quarter||'';obj.year=b.year;}const prefixes={discounts:'CK',programs:'CT',expenses:'CP',documents:'HS',registrations:'QT',monthlyBudgets:'NS-T'};obj.id=key==='monthlyBudgets'?`NS-T${String(obj.month).padStart(2,'0')}-${obj.year}`:`${prefixes[key]}-${Date.now().toString().slice(-6)}`;if(key==='documents'&&obj.updated)obj.updated=new Date(obj.updated).toLocaleDateString('vi-VN');if(key==='monthlyBudgets'){const existing=state.monthlyBudgets.findIndex(x=>x.month===obj.month&&x.year===obj.year);if(existing>=0)state.monthlyBudgets[existing]=obj;else state.monthlyBudgets.push(obj);state.monthlyBudgets.sort((a,b)=>a.year-b.year||a.month-b.month)}else if(key==='registrations'){obj.approvalTotal=2;obj.approvalStep=obj.status==='Tạo mới'||obj.status==='Chờ phê duyệt'?0:2;state.approvals.unshift(obj);if(!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(b)b.used=Number(b.used||0)+Number(obj.amount||0);}}else state[key].unshift(obj);persist();closeModal();go(key==='monthlyBudgets'?'master':current);showToast('Đã lưu bản ghi mới')}
+function saveRecord(){const key=window.activeFormKey||current;const schema=formSchemas[key];if(!schema)return;const fd=new FormData(document.getElementById('recordForm'));const obj={};if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(fd.get('type'))){for(const [k,v] of fd.entries()){if(['budgetItemCategory','budgetItemAmount'].includes(k))continue;obj[k]=k==='amount'?Number(v||0):v;}if(fd.get('type')==='Ngân sách'){const cats=fd.getAll('budgetItemCategory'),amts=fd.getAll('budgetItemAmount').map(v=>Number(v||0));obj.budgetItems=cats.map((category,i)=>({category,amount:amts[i]||0})).filter(x=>x.amount>0);obj.amount=obj.budgetItems.reduce((a,x)=>a+x.amount,0);obj.category=obj.budgetItems.length===1?obj.budgetItems[0].category:`${obj.budgetItems.length} hạng mục`;}else if(fd.get('type')==='Điều chỉnh ngân sách'){const refs=fd.getAll('adjustmentBudgetRef'),types=fd.getAll('adjustmentItemType'),amts=fd.getAll('adjustmentItemAmount').map(v=>Number(v||0));obj.adjustmentItems=refs.map((budgetRef,i)=>{const b=state.categoryBudgets.find(x=>x.id===budgetRef);return {budgetRef,category:b?.category||'',adjustmentType:types[i],amount:amts[i]||0}}).filter(x=>x.amount>0);obj.amount=obj.adjustmentItems.reduce((a,x)=>a+x.amount,0);obj.category=obj.adjustmentItems.length===1?obj.adjustmentItems[0].category:`${obj.adjustmentItems.length} hạng mục`;obj.budgetRef=obj.adjustmentItems[0]?.budgetRef||'';obj.adjustmentType=obj.adjustmentItems.length===1?obj.adjustmentItems[0].adjustmentType:'Nhiều hình thức';}obj.usedAmount=0;obj.year=Number(obj.year);if(obj.month)obj.month=Number(obj.month);if(obj.quarter)obj.quarter=Number(obj.quarter);}else{schema.forEach(f=>obj[f[0]]=f[2]==='number'?Number(fd.get(f[0])||0):fd.get(f[0]));}if(!obj.name){showToast('Vui lòng nhập tên hoặc nội dung');return}if(key==='registrations'&&['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)&&!obj.amount){showToast('Vui lòng nhập ít nhất một hạng mục và số tiền ngân sách');return}if(key==='registrations'&&!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(!b){showToast('Không có ngân sách hạng mục phù hợp. Vui lòng đăng ký hoặc điều chỉnh ngân sách trước.');return}const remain=categoryBudgetRemaining(b);if(obj.amount>remain){showToast(`Chi phí vượt ngân sách còn lại ${money(remain)} của ${budgetPeriodLabel(b)} — ${b.category}`);return}obj.category=b.category;obj.department=b.department;obj.periodType=b.periodType;obj.month=b.month||'';obj.quarter=b.quarter||'';obj.year=b.year;}const prefixes={discounts:'CK',programs:'CT',expenses:'CP',documents:'HS',registrations:'QT',monthlyBudgets:'NS-T'};obj.id=key==='monthlyBudgets'?`NS-T${String(obj.month).padStart(2,'0')}-${obj.year}`:`${prefixes[key]}-${Date.now().toString().slice(-6)}`;if(key==='documents'&&obj.updated)obj.updated=new Date(obj.updated).toLocaleDateString('vi-VN');if(key==='monthlyBudgets'){const existing=state.monthlyBudgets.findIndex(x=>x.month===obj.month&&x.year===obj.year);if(existing>=0)state.monthlyBudgets[existing]=obj;else state.monthlyBudgets.push(obj);state.monthlyBudgets.sort((a,b)=>a.year-b.year||a.month-b.month)}else if(key==='registrations'){obj.approvalTotal=2;obj.approvalStep=obj.status==='Tạo mới'||obj.status==='Chờ phê duyệt'?0:2;state.approvals.unshift(obj);if(!['Ngân sách','Điều chỉnh ngân sách'].includes(obj.type)){const b=state.categoryBudgets.find(x=>x.id===obj.budgetRef);if(b)b.used=Number(b.used||0)+Number(obj.amount||0);}}else state[key].unshift(obj);persist();closeModal();go(key==='monthlyBudgets'?'master':current);showToast('Đã lưu bản ghi mới')}
 function removeItem(key,id){state[key]=state[key].filter(x=>x.id!==id);persist();go(current);showToast('Đã xóa bản ghi')}
 function submitProcess(id){
  const x=state.approvals.find(i=>i.id===id);if(!x)return;
@@ -398,7 +428,7 @@ function approveProcess(id){
 }
 function applyApprovedBudgetChange(x){
  if(x.type==='Ngân sách'&&!x.budgetCreated){const code=x.periodType==='Tháng'?`T${String(x.month).padStart(2,'0')}`:x.periodType==='Quý'?`Q${x.quarter}`:'N';const catCode=(x.category||'Khác').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z]/g,'').slice(0,6).toUpperCase();const id=`NS-HM-${catCode}-${code}-${x.year}`;if(!state.categoryBudgets.some(i=>i.id===id))state.categoryBudgets.unshift({id,department:x.department,category:x.category||'Khác',periodType:x.periodType,month:x.month||'',quarter:x.quarter||'',year:x.year,approved:Number(x.amount||0),used:0,status:'Đang thực hiện'});x.budgetCreated=true;}
- if(x.type==='Điều chỉnh ngân sách'&&!x.adjustmentApplied){const b=state.categoryBudgets.find(i=>i.id===x.budgetRef);if(b){if(x.adjustmentType==='Tăng ngân sách')b.approved+=Number(x.amount||0);else if(x.adjustmentType==='Giảm ngân sách'){if(Number(x.amount||0)>categoryBudgetRemaining(b)){x.status='Chờ phê duyệt';x.approvalStep=x.approvalTotal-1;showToast('Không thể giảm vượt phần ngân sách còn lại');return}b.approved-=Number(x.amount||0);}x.adjustmentApplied=true;}}
+ if(x.type==='Điều chỉnh ngân sách'&&!x.adjustmentApplied){const items=x.adjustmentItems?.length?x.adjustmentItems:[{budgetRef:x.budgetRef,adjustmentType:x.adjustmentType,amount:Number(x.amount||0)}];for(const item of items){const b=state.categoryBudgets.find(i=>i.id===item.budgetRef);if(!b)continue;if(item.adjustmentType==='Tăng ngân sách')b.approved+=Number(item.amount||0);else if(item.adjustmentType==='Giảm ngân sách'){if(Number(item.amount||0)>categoryBudgetRemaining(b)){x.status='Chờ phê duyệt';x.approvalStep=x.approvalTotal-1;showToast(`Không thể giảm vượt phần ngân sách còn lại của ${b.category}`);return}b.approved-=Number(item.amount||0);}}x.adjustmentApplied=true;}
 }
 function finishBudget(id){const x=state.approvals.find(i=>i.id===id);if(!x)return;x.usedAmount=x.amount;x.status='Hoàn thành';x.completionReason='Đã sử dụng hết ngân sách';persist();go('registrations');showToast('Ngân sách đã hoàn thành');}
 
@@ -406,7 +436,7 @@ function advanceProcess(id){const x=state.approvals.find(i=>i.id===id);if(!x)ret
  if(x.status==='Tạo mới'){x.status='Chờ phê duyệt';x.approvalStep=0;}
  else if(x.status==='Chờ phê duyệt'){
   x.approvalTotal=x.approvalTotal||2;x.approvalStep=(x.approvalStep||0)+1;
-  if(x.approvalStep>=x.approvalTotal){x.status=['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)?'Đang thực hiện':'Đã phê duyệt';if(x.type==='Ngân sách'&&!x.budgetCreated){const code=x.periodType==='Tháng'?`T${String(x.month).padStart(2,'0')}`:x.periodType==='Quý'?`Q${x.quarter}`:'N';const catCode=(x.category||'Khác').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z]/g,'').slice(0,6).toUpperCase();const id=`NS-HM-${catCode}-${code}-${x.year}`;if(!state.categoryBudgets.some(i=>i.id===id))state.categoryBudgets.unshift({id,department:x.department,category:x.category||'Khác',periodType:x.periodType,month:x.month||'',quarter:x.quarter||'',year:x.year,approved:Number(x.amount||0),used:0,status:'Đang thực hiện'});x.budgetCreated=true;}if(x.type==='Điều chỉnh ngân sách'&&!x.adjustmentApplied){const b=state.categoryBudgets.find(i=>i.id===x.budgetRef);if(b){if(x.adjustmentType==='Tăng ngân sách')b.approved+=Number(x.amount||0);else if(x.adjustmentType==='Giảm ngân sách'){if(Number(x.amount||0)>categoryBudgetRemaining(b)){x.status='Chờ phê duyệt';x.approvalStep=x.approvalTotal-1;showToast('Không thể giảm vượt phần ngân sách còn lại');return}b.approved-=Number(x.amount||0);}x.adjustmentApplied=true;}}}
+  if(x.approvalStep>=x.approvalTotal){x.status=['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)?'Đang thực hiện':'Đã phê duyệt';if(x.type==='Ngân sách'&&!x.budgetCreated){const code=x.periodType==='Tháng'?`T${String(x.month).padStart(2,'0')}`:x.periodType==='Quý'?`Q${x.quarter}`:'N';const catCode=(x.category||'Khác').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z]/g,'').slice(0,6).toUpperCase();const id=`NS-HM-${catCode}-${code}-${x.year}`;if(!state.categoryBudgets.some(i=>i.id===id))state.categoryBudgets.unshift({id,department:x.department,category:x.category||'Khác',periodType:x.periodType,month:x.month||'',quarter:x.quarter||'',year:x.year,approved:Number(x.amount||0),used:0,status:'Đang thực hiện'});x.budgetCreated=true;}if(x.type==='Điều chỉnh ngân sách'&&!x.adjustmentApplied){const items=x.adjustmentItems?.length?x.adjustmentItems:[{budgetRef:x.budgetRef,adjustmentType:x.adjustmentType,amount:Number(x.amount||0)}];for(const item of items){const b=state.categoryBudgets.find(i=>i.id===item.budgetRef);if(!b)continue;if(item.adjustmentType==='Tăng ngân sách')b.approved+=Number(item.amount||0);else if(item.adjustmentType==='Giảm ngân sách'){if(Number(item.amount||0)>categoryBudgetRemaining(b)){x.status='Chờ phê duyệt';x.approvalStep=x.approvalTotal-1;showToast(`Không thể giảm vượt phần ngân sách còn lại của ${b.category}`);return}b.approved-=Number(item.amount||0);}}x.adjustmentApplied=true;}}
  }
  else if(['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)&&x.status==='Đang thực hiện'){
   x.usedAmount=x.amount;x.status='Hoàn thành';x.completionReason='Đã sử dụng hết ngân sách';
