@@ -1,9 +1,9 @@
 {
-  "name": "sales-expense-manager-full",
+  "name": "sales-expense-manager-update",
+  "version": "2.0.0",
   "private": true,
-  "version": "1.0.1",
   "scripts": {
-    "dev": "python3 -m http.server 3000",
-    "build": "rm -rf dist && mkdir -p dist && cp index.html dist/index.html"
+    "dev": "npx serve .",
+    "build": "rm -rf dist && mkdir dist && cp index.html dist/index.html && cp -r assets dist/assets"
   }
 }
