@@ -1,23 +1,14 @@
-# SalesCost Pro – Ngân sách theo hạng mục
+# SalesCost Pro – Bản cập nhật Báo cáo bán hàng & Tài liệu
 
-Bản cập nhật bổ sung kiểm soát ngân sách theo hạng mục và liên kết bắt buộc giữa chi phí với ngân sách.
-
-## Chức năng mới
-
-- Ngân sách được quản lý theo bộ phận, hạng mục và kỳ tháng/quý/năm.
-- Luồng đăng ký ngân sách yêu cầu chọn hạng mục.
-- Luồng điều chỉnh ngân sách chọn trực tiếp ngân sách hạng mục cần tăng/giảm.
-- Đăng ký chi phí bắt buộc chọn ngân sách tương ứng.
-- Chỉ hiển thị ngân sách cùng loại chi phí còn số dư.
-- Không cho lưu chi phí vượt số dư ngân sách của tháng/quý/năm và hạng mục tương ứng.
-- Khi tạo chi phí, số tiền được ghi nhận vào phần đã sử dụng của ngân sách liên kết.
+## Nội dung cập nhật
+- Module **Báo cáo bán hàng** có 2 lựa chọn:
+  - **Mục tiêu trong tháng**: mục tiêu, thực hiện, còn thiếu, tiến độ và trạng thái theo nhân viên/bộ phận.
+  - **Báo cáo bán hàng**: tổng hợp các khoản hỗ trợ, chương trình, giá trị và tình trạng thanh toán.
+- Khôi phục đầy đủ module **Tài liệu**:
+  - Bộ hồ sơ bắt buộc theo từng loại chi phí.
+  - Checklist tài liệu đã có/còn thiếu.
+  - Tiến độ hoàn thiện hồ sơ.
+  - Danh sách tài liệu liên kết và trạng thái kiểm tra.
 
 ## Chạy thử
-
-Mở `index.html` hoặc chạy:
-
-```bash
-npm run build
-```
-
-Triển khai Vercel với Output Directory là `dist`.
+Mở `index.html` trực tiếp hoặc chạy `npm run build` và triển khai thư mục `dist` lên Vercel.

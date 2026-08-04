@@ -1,4 +1,4 @@
-const STORAGE_KEY='salescost-pro-v7-role-actions';
+const STORAGE_KEY='salescost-pro-v8-sales-report-documents';
 const CURRENT_USER='Trần Diệu Hương';
 const CURRENT_ROLE='Quản trị viên';
 const navItems=[
@@ -21,6 +21,12 @@ const seed={
   {id:'CT-2026-017',name:'Thưởng doanh số quý III',type:'Thưởng doanh số',owner:'Trần Hoàng Long',period:'01/07 – 30/09/2026',budget:580000000,status:'Đang thực hiện'},
   {id:'CT-2026-016',name:'Mở mới đại lý khu vực Bắc',type:'Mở mới khách hàng',owner:'Lê Thùy Dương',period:'15/07 – 15/08/2026',budget:180000000,status:'Chờ đối soát'},
   {id:'CT-2026-015',name:'Hỗ trợ hội nghị khách hàng',type:'Hội nghị',owner:'Phạm Tuấn Kiệt',period:'05/07 – 10/07/2026',budget:240000000,status:'Đã hoàn thành'}
+ ],
+ salesTargets:[
+  {id:'MT-08-01',employee:'Nguyễn Minh Anh',department:'Kinh doanh miền Nam',month:'Tháng 8/2026',target:1250000000,actual:1080000000},
+  {id:'MT-08-02',employee:'Trần Hoàng Long',department:'Kinh doanh miền Bắc',month:'Tháng 8/2026',target:1100000000,actual:980000000},
+  {id:'MT-08-03',employee:'Lê Thùy Dương',department:'Kinh doanh miền Trung',month:'Tháng 8/2026',target:850000000,actual:720000000},
+  {id:'MT-08-04',employee:'Phạm Tuấn Kiệt',department:'Kinh doanh toàn quốc',month:'Tháng 8/2026',target:1450000000,actual:1510000000}
  ],
  expenses:[
   {id:'CP-2026-204',name:'Chi phí hỗ trợ trưng bày tháng 8',ref:'CT-2026-018',department:'Kinh doanh miền Nam',amount:168000000,status:'Chờ đăng ký'},
@@ -91,16 +97,31 @@ function master(){const monthRows=state.monthlyBudgets.map(x=>{const remain=x.ap
 function discounts(){return table(['Chính sách','Đối tượng','Điều kiện','Mức chiết khấu','Phụ trách','Trạng thái',''],state.discounts.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.target}</td><td>${x.condition}</td><td><b>${x.value}</b></td><td>${x.owner}</td><td>${badge(x.status)}</td><td><button class="link-btn danger" onclick="removeItem('discounts','${x.id}')">Xóa</button></td></tr>`))}
 function programs(){return table(['Chương trình','Loại','Phụ trách','Thời gian','Ngân sách','Trạng thái'],state.programs.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.type}</td><td>${x.owner}</td><td>${x.period}</td><td><b>${money(x.budget)}</b></td><td>${badge(x.status)}</td></tr>`))}
 function budget(){const annualPlanned=state.budgets.reduce((s,x)=>s+x.planned,0),annualApproved=state.budgets.reduce((s,x)=>s+x.approved,0),annualUsed=state.budgets.reduce((s,x)=>s+x.used,0);const max=Math.max(...state.monthlyBudgets.map(x=>x.approved),1);return summary([['Kế hoạch năm',money(annualPlanned)],['Đã đăng ký',money(annualApproved)],['Đã sử dụng',money(annualUsed)],['Còn lại',money(annualApproved-annualUsed)]])+`<div class="panel monthly-panel"><div class="panel-head"><div><h3>Ngân sách theo tháng</h3><p>So sánh ngân sách được đăng ký và số tiền đã sử dụng trong năm 2026</p></div><button class="btn primary" onclick="openMonthlyBudgetModal()">＋ Thêm ngân sách tháng</button></div><div class="monthly-chart">${state.monthlyBudgets.map(x=>{const approved=Math.round(x.approved/max*100),used=Math.round(x.used/max*100);return `<div class="month-col"><div class="month-values"><span>${Math.round(x.approved/1000000)}</span><b>${x.used?Math.round(x.used/1000000):0}</b></div><div class="month-bars"><i style="height:${approved}%"></i><em style="height:${used}%"></em></div><small>T${x.month}</small></div>`}).join('')}</div><div class="chart-key"><span><i class="approved-key"></i>Ngân sách đăng ký</span><span><i class="used-key"></i>Đã sử dụng</span><small>Đơn vị: triệu đồng</small></div></div>`+table(['Tháng','Kế hoạch','Đăng ký','Đã sử dụng','Còn lại','Tỷ lệ sử dụng','Trạng thái',''],state.monthlyBudgets.map(x=>{const remain=x.approved-x.used,rate=x.approved?Math.round(x.used/x.approved*100):0;return `<tr><td><b>Tháng ${x.month}/${x.year}</b><span>${x.id}</span></td><td>${money(x.planned)}</td><td><b>${money(x.approved)}</b></td><td>${money(x.used)}</td><td><b>${money(remain)}</b></td><td><div class="usage"><div><i style="width:${Math.min(rate,100)}%"></i></div><b>${rate}%</b></div></td><td>${badge(x.status)}</td><td><button class="link-btn danger" onclick="removeItem('monthlyBudgets','${x.id}')">Xóa</button></td></tr>`})) + `<div class="section-gap"></div>` + `<h3 class="section-title">Ngân sách theo khu vực</h3>` + table(['Ngân sách','Bộ phận','Kế hoạch','Đăng ký','Đã sử dụng','Còn lại'],state.budgets.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td>${x.owner}</td><td>${money(x.planned)}</td><td><b>${money(x.approved)}</b></td><td>${money(x.used)}</td><td><b>${money(x.approved-x.used)}</b></td></tr>`))}
-function expenses(){
+let salesReportMode='targets';
+function setSalesReportMode(mode){salesReportMode=mode;go('expenses')}
+function monthlyTargetsView(){
+ const targets=Array.isArray(state.salesTargets)&&state.salesTargets.length?state.salesTargets:seed.salesTargets;
+ const totalTarget=targets.reduce((s,x)=>s+Number(x.target||0),0);
+ const totalActual=targets.reduce((s,x)=>s+Number(x.actual||0),0);
+ const completion=totalTarget?Math.round(totalActual/totalTarget*100):0;
+ const reached=targets.filter(x=>Number(x.actual||0)>=Number(x.target||0)).length;
+ const rows=targets.map(x=>{const pct=x.target?Math.round(x.actual/x.target*100):0;const remain=Math.max(0,x.target-x.actual);return `<tr><td><b>${x.employee}</b><span>${x.id}</span></td><td>${x.department}</td><td>${x.month}</td><td><b>${money(x.target)}</b></td><td><b>${money(x.actual)}</b></td><td>${money(remain)}</td><td><div class="file-progress"><div><i style="width:${Math.min(pct,100)}%"></i></div><b>${pct}%</b></div></td><td>${badge(pct>=100?'Hoàn thành':pct>=80?'Đang thực hiện':'Chưa đạt')}</td></tr>`}).join('');
+ return summary([['Mục tiêu tháng',money(totalTarget)],['Doanh số thực hiện',money(totalActual)],['Tỷ lệ hoàn thành',completion+'%'],['Đã đạt mục tiêu',reached+'/'+targets.length]])+table(['Nhân viên phụ trách','Bộ phận','Kỳ mục tiêu','Mục tiêu','Thực hiện','Còn thiếu','Tiến độ','Trạng thái'],rows);
+}
+function salesReportView(){
  const total=state.expenses.reduce((s,x)=>s+Number(x.amount||0),0);
  const paid=state.expenses.filter(x=>x.status.includes('Đã thanh toán')).reduce((s,x)=>s+Number(x.amount||0),0);
  const pending=state.expenses.filter(x=>!x.status.includes('Đã thanh toán')).reduce((s,x)=>s+Number(x.amount||0),0);
  const departments=new Set(state.expenses.map(x=>x.department)).size;
- const rows=state.expenses.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td><b>${x.ref}</b></td><td>${x.department}</td><td><b>${money(x.amount)}</b></td><td>${badge(x.status)}</td></tr>`);
- return `<div class="panel flow-intro"><h3>Báo cáo bán hàng</h3><p>Tổng hợp các khoản hỗ trợ bán hàng, chương trình và tình trạng thanh toán theo bộ phận.</p></div>`+
- summary([['Tổng giá trị',money(total)],['Đã thanh toán',money(paid)],['Chưa hoàn tất',money(pending)],['Bộ phận phát sinh',departments]])+
- table(['Nội dung báo cáo','Chương trình / chính sách','Bộ phận','Giá trị','Trạng thái'],rows)
+ const rows=state.expenses.map(x=>`<tr><td><b>${x.name}</b><span>${x.id}</span></td><td><b>${x.ref}</b></td><td>${x.department}</td><td><b>${money(x.amount)}</b></td><td>${badge(x.status)}</td></tr>`).join('');
+ return summary([['Tổng giá trị',money(total)],['Đã thanh toán',money(paid)],['Chưa hoàn tất',money(pending)],['Bộ phận phát sinh',departments]])+table(['Nội dung báo cáo','Chương trình / chính sách','Bộ phận','Giá trị','Trạng thái'],rows);
 }
+function expenses(){
+ return `<div class="flow-tabs primary-tabs"><button class="flow-tab ${salesReportMode==='targets'?'active':''}" onclick="setSalesReportMode('targets')">Mục tiêu trong tháng</button><button class="flow-tab ${salesReportMode==='report'?'active':''}" onclick="setSalesReportMode('report')">Báo cáo bán hàng</button></div>`+
+ `<div class="panel flow-intro"><h3>${salesReportMode==='targets'?'Mục tiêu trong tháng':'Báo cáo bán hàng'}</h3><p>${salesReportMode==='targets'?'Theo dõi mục tiêu, kết quả thực hiện và tỷ lệ hoàn thành của từng nhân viên, bộ phận trong tháng.':'Tổng hợp các khoản hỗ trợ bán hàng, chương trình và tình trạng thanh toán theo bộ phận.'}</p></div>`+
+ (salesReportMode==='targets'?monthlyTargetsView():salesReportView());
+}
+
 function isBudgetProcess(x){return ['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)}
 function nextApprover(x){return (x.approvalStep||0)===0?x.managerApprover:x.financeApprover}
 function canAdminAct(){return CURRENT_ROLE==='Quản trị viên'}
@@ -374,9 +395,10 @@ function documentRequirementFor(x){
  return {type,docs,completed,percent:docs.length?Math.round(completed/docs.length*100):0};
 }
 function documents(){
+ if(!Array.isArray(state.documents)||!state.documents.length)state.documents=structuredClone(seed.documents);
  const cards=Object.entries(documentRequirements).map(([type,docs],idx)=>{const completed=Math.max(1,docs.length-(idx%3));return `<div class="panel doc-checklist"><span class="flow-badge">${type}</span><h3>Bộ hồ sơ bắt buộc</h3><small>${completed}/${docs.length} tài liệu đã đủ</small>${docs.map((d,i)=>`<div class="doc-item ${i>=completed?'missing':''}"><i>${i<completed?'✓':'!'}</i><div><b>${d}</b><small>${i<completed?'Đã bổ sung và chờ/đã kiểm tra':'Bắt buộc bổ sung trước khi hoàn thành'}</small></div></div>`).join('')}<div class="doc-progress"><span style="width:${Math.round(completed/docs.length*100)}%"></span></div></div>`}).join('');
  const rows=state.documents.map(x=>{const r=documentRequirementFor(x);return `<tr><td><b>📄 ${x.name}</b><span>${x.id}</span></td><td><b>${r.type}</b><div class="required-doc-list">${r.docs.map((d,i)=>`<span class="${i<r.completed?'done':'missing'}">${i<r.completed?'✓':'○'} ${d}</span>`).join('')}</div></td><td>${x.type}</td><td><b>${x.ref}</b></td><td>${x.updated}</td><td><div class="file-progress"><div><i style="width:${r.percent}%"></i></div><b>${r.completed}/${r.docs.length} · ${r.percent}%</b></div></td><td>${badge(x.status)}</td></tr>`});
- return summary([['Tổng tài liệu',state.documents.length],['Đã kiểm tra',state.documents.filter(x=>x.status.includes('Đã')).length],['Chờ kiểm tra',state.documents.filter(x=>x.status.includes('Chờ')).length],['Còn thiếu',state.documents.filter(x=>x.status.includes('Thiếu')).length]])+
+ return `<div class="panel flow-intro"><h3>Quản lý tài liệu</h3><p>Quản lý bộ hồ sơ bắt buộc, tài liệu đã tải lên, tài liệu còn thiếu và tiến độ hoàn thiện theo từng loại chi phí.</p></div>`+summary([['Tổng tài liệu',state.documents.length],['Đã kiểm tra',state.documents.filter(x=>x.status.includes('Đã')).length],['Chờ kiểm tra',state.documents.filter(x=>x.status.includes('Chờ')).length],['Còn thiếu',state.documents.filter(x=>x.status.includes('Thiếu')).length]])+
  `<div class="panel flow-intro"><h3>Danh mục hồ sơ theo loại chi phí</h3><p>Mỗi đăng ký chi phí chỉ được chuyển sang Hoàn thành khi toàn bộ tài liệu bắt buộc của loại chi phí đó đã được bổ sung và kiểm tra.</p></div><div class="doc-requirement-grid">${cards}</div><div class="section-gap"></div>`+
  table(['Tên tài liệu','Danh mục tài liệu yêu cầu','Loại tài liệu','Liên kết','Cập nhật','Tiến độ hồ sơ','Trạng thái'],rows)
 }
