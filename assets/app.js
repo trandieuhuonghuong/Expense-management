@@ -455,7 +455,21 @@ function documents(){
 }
 function settings(){return `<div class="grid-2"><div class="panel"><h3>Người tham gia phê duyệt</h3><p class="report-grid-note">Mỗi quy trình đi lần lượt qua người tạo đơn, trưởng bộ phận và tài vụ.</p>${[['Người tạo đơn','Người khởi tạo từng đề nghị'],['Trưởng bộ phận','Nguyễn Văn Nam / cấu hình theo phòng ban'],['Tài vụ','Trần Thu Hà / cấu hình theo đơn vị']].map(x=>`<div class="activity"><div class="grow"><b>${x[0]}</b><small>${x[1]}</small></div><span>→</span></div>`).join('')}<button class="btn primary" style="margin-top:14px" onclick="showToast('Đã lưu cấu hình người phê duyệt')">Lưu thay đổi</button></div><div class="panel"><h3>Cấu hình hệ thống</h3>${['Mã tự động','Phân quyền người dùng','Thông báo tài liệu','Ngôn ngữ hệ thống','Sao lưu dữ liệu'].map(x=>`<div class="activity"><div class="grow"><b>${x}</b><small>Cấu hình mô phỏng trong phiên bản demo</small></div><span>→</span></div>`).join('')}</div></div>`}
 const renders={dashboard,master,expenses,registrations,documents,reports,settings};
-function go(id){current=id;pageTitle.textContent=navItems.find(x=>x[0]===id)[2];app.innerHTML=renders[id]();document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));sidebar.classList.remove('open');bindSearch()}
+const routePaths={dashboard:'/',master:'/master',expenses:'/revenue',registrations:'/cost',documents:'/file',reports:'/reports',settings:'/settings'};
+const pathRoutes={'/':'dashboard','/index.html':'dashboard','/master':'master','/data':'master','/revenue':'expenses','/sales':'expenses','/cost':'registrations','/expense':'registrations','/process':'registrations','/file':'documents','/files':'documents','/documents':'documents','/reports':'reports','/report':'reports','/settings':'settings'};
+function routeFromLocation(){return pathRoutes[location.pathname.replace(/\/$/,'')||'/']||'dashboard'}
+function go(id,updateUrl=true){
+  if(!renders[id])id='dashboard';
+  current=id;
+  const navItem=navItems.find(x=>x[0]===id);
+  pageTitle.textContent=navItem?navItem[2]:'Tổng quan';
+  app.innerHTML=renders[id]();
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
+  sidebar.classList.remove('open');
+  bindSearch();
+  if(updateUrl&&/^https?:$/.test(location.protocol)&&location.pathname!==routePaths[id])history.pushState({page:id},'',routePaths[id]);
+}
+window.addEventListener('popstate',()=>go(routeFromLocation(),false));
 function bindSearch(){const input=document.getElementById('globalSearch');input.value='';input.oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')}}
 nav.innerHTML=navItems.map(x=>`<button data-id="${x[0]}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('');
 const formSchemas={
@@ -530,4 +544,4 @@ function advanceProcess(id){const x=state.approvals.find(i=>i.id===id);if(!x)ret
 function incrementMaster(key){state.master[key]++;persist();go('master');showToast('Đã thêm dữ liệu mẫu')}
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='salescost-data.json';a.click();URL.revokeObjectURL(a.href);showToast('Đã xuất dữ liệu JSON')}
 function showToast(t){const toast=document.getElementById('toast');toast.textContent='✓ '+t;toast.style.display='block';setTimeout(()=>toast.style.display='none',2200)}
-document.getElementById('menuBtn').onclick=()=>sidebar.classList.toggle('open');document.getElementById('createBtn').onclick=()=>{if(current==='expenses')return salesReportMode==='targets'?openRevenueTargetModal():openSalesReportModal();if(current==='registrations')return registrationFlow==='budget'?openBudgetUnifiedModal():openRegistrationModal('');openModal()};document.getElementById('exportBtn').onclick=exportData;document.getElementById('closeModal').onclick=closeModal;document.getElementById('cancelModal').onclick=closeModal;document.getElementById('saveRecord').onclick=saveRecord;document.getElementById('modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};go('dashboard');
+document.getElementById('menuBtn').onclick=()=>sidebar.classList.toggle('open');document.getElementById('createBtn').onclick=()=>{if(current==='expenses')return salesReportMode==='targets'?openRevenueTargetModal():openSalesReportModal();if(current==='registrations')return registrationFlow==='budget'?openBudgetUnifiedModal():openRegistrationModal('');openModal()};document.getElementById('exportBtn').onclick=exportData;document.getElementById('closeModal').onclick=closeModal;document.getElementById('cancelModal').onclick=closeModal;document.getElementById('saveRecord').onclick=saveRecord;document.getElementById('modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};go(routeFromLocation(),false);

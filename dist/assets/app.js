@@ -1,4 +1,4 @@
-const STORAGE_KEY='salescost-pro-v10-revenue-cost-documents';
+const STORAGE_KEY='salescost-pro-v11-expense-linked-documents';
 const CURRENT_USER='Trần Diệu Hương';
 const CURRENT_ROLE='Quản trị viên';
 const navItems=[
@@ -168,7 +168,7 @@ function processActions(x){
   return `<button class="action-btn primary" onclick="advanceProcess('${x.id}')">Đã sử dụng hết chi phí</button>`;
  }
  if(!isBudgetProcess(x)&&x.status==='Chờ bổ sung tài liệu'&&owner){
-  return `<button class="action-btn primary" onclick="advanceProcess('${x.id}')">Xác nhận đủ tài liệu</button>`;
+  return expenseDocumentsComplete(x.id)?`<button class="action-btn primary" onclick="advanceProcess('${x.id}')">Hoàn thành chi phí</button>`:`<button class="action-btn subtle" onclick="go('documents')">Bổ sung/hoàn trả tài liệu</button>`;
  }
  return '<span class="muted">—</span>';
 }
@@ -393,27 +393,83 @@ function openRegistrationModal(type=''){
 }
 const documentRequirements={
  'Chiết khấu nhà phân phối':['Đề nghị chiết khấu','Chính sách/Phụ lục chiết khấu','Bảng doanh số đối soát','Biên bản xác nhận với nhà phân phối','Hóa đơn hoặc chứng từ cấn trừ'],
- 'Chiết khấu bán hàng':['Đề nghị chiết khấu bán hàng','Danh sách đơn hàng áp dụng','Bảng tính chiết khấu','Biên bản đối soát','Chứng từ thanh toán/cấn trừ'],
- 'Thưởng nhà phân phối':['Đề nghị thưởng','Quy định điều kiện thưởng','Bảng xác nhận chỉ tiêu','Biên bản xác nhận kết quả','Chứng từ chi thưởng'],
- 'Hội chợ':['Đề xuất tham gia hội chợ','Phê duyệt ngân sách','Hợp đồng/đăng ký gian hàng','Hóa đơn chi phí','Biên bản nghiệm thu','Hình ảnh và báo cáo kết quả']
+ 'Chiết khấu bán hàng':['Đề nghị chiết khấu bán hàng','Danh sách đơn hàng áp dụng','Bảng tính chiết khấu','Biên bản đối soát bán hàng','Chứng từ thanh toán/cấn trừ'],
+ 'Thưởng nhà phân phối':['Đề nghị thưởng nhà phân phối','Chính sách và điều kiện thưởng','Bảng xác nhận chỉ tiêu','Biên bản xác nhận kết quả','Chứng từ chi thưởng'],
+ 'Hội chợ':['Đề xuất tham gia hội chợ','Phê duyệt ngân sách','Hợp đồng/Đăng ký gian hàng','Hóa đơn và chứng từ chi phí','Biên bản nghiệm thu','Hình ảnh minh chứng','Báo cáo kết quả']
 };
-function documentRequirementFor(x){
- const type=x.expenseType||(/chiết khấu/i.test(x.name)?'Chiết khấu nhà phân phối':/đối soát|thưởng/i.test(x.name)?'Thưởng nhà phân phối':/trưng bày|hình ảnh|nghiệm thu/i.test(x.name)?'Hội chợ':'Chiết khấu bán hàng');
- const docs=documentRequirements[type]||[];
- const completed=Math.min(Number(x.completedDocs||0),docs.length);
- return {type,docs,completed,percent:docs.length?Math.round(completed/docs.length*100):0};
+function expenseProcesses(){return state.approvals.filter(x=>!isBudgetProcess(x))}
+function defaultDocumentItems(type){return (documentRequirements[type]||[]).map(name=>({name,status:'Còn thiếu',files:[],returnNote:''}))}
+function ensureDocumentCases(){
+ if(!state.documentCases)state.documentCases=[];
+ const eligible=expenseProcesses().filter(x=>['Đang thực hiện','Chờ bổ sung tài liệu','Hoàn thành'].includes(x.status));
+ eligible.forEach(x=>{
+  if(!state.documentCases.some(c=>(c.expenseIds||[]).includes(x.id))){
+   state.documentCases.push({id:'TL-'+x.id,expenseIds:[x.id],createdAt:new Date().toLocaleDateString('vi-VN'),itemsByType:{[x.type]:defaultDocumentItems(x.type)}})
+  }
+ });
+ state.documentCases.forEach(c=>{
+  if(!c.itemsByType)c.itemsByType={};
+  (c.expenseIds||[]).forEach(id=>{const x=state.approvals.find(a=>a.id===id);if(x&&!c.itemsByType[x.type])c.itemsByType[x.type]=defaultDocumentItems(x.type)})
+ });
 }
-function documentSetFor(type){const docs=documentRequirements[type]||[];return docs.map((name,i)=>({name,status:i<Math.max(1,docs.length-2)?'Đã có':'Còn thiếu',files:[]}))}
-function ensureDocumentSets(){if(!state.documentSets)state.documentSets={};Object.keys(documentRequirements).forEach(type=>{if(!state.documentSets[type])state.documentSets[type]=documentSetFor(type)})}
-function uploadDocument(type,index,input){const files=[...input.files].map(f=>({name:f.name,size:f.size,type:f.type,updated:new Date().toLocaleDateString('vi-VN')}));ensureDocumentSets();const item=state.documentSets[type][index];item.files=[...(item.files||[]),...files];item.status=item.files.length?'Đã có':'Còn thiếu';persist();go('documents');showToast(`Đã tải lên ${files.length} tệp`)}
-function removeUploadedFile(type,index,fileIndex){ensureDocumentSets();const item=state.documentSets[type][index];item.files.splice(fileIndex,1);item.status=item.files.length?'Đã có':'Còn thiếu';persist();go('documents')}
-function documents(){ensureDocumentSets();const sections=Object.entries(documentRequirements).map(([type])=>{const items=state.documentSets[type];const enough=items.filter(x=>x.status==='Đã có').length;return `<div class="panel document-type-card"><div class="document-type-head"><div><span class="flow-badge">${type}</span><h3>${type}</h3><p>Tên và danh mục hồ sơ bắt buộc cho loại chi phí này.</p></div><div class="doc-count"><b>${enough}/${items.length}</b><small>hồ sơ đã đủ</small></div></div><div class="document-detail-table"><div class="document-detail-row header"><span>Tên hồ sơ / tài liệu</span><span>Trạng thái</span><span>Tệp đã tải lên</span><span>Tải tài liệu</span></div>${items.map((item,i)=>`<div class="document-detail-row"><div><b>${i+1}. ${item.name}</b><small>Bắt buộc đối với ${type}</small></div><div>${badge(item.status)}</div><div class="uploaded-files">${(item.files||[]).length?(item.files||[]).map((f,fi)=>`<span>📎 ${f.name}<button onclick="removeUploadedFile('${type}',${i},${fi})">×</button></span>`).join(''):'<em>Chưa có tệp</em>'}</div><div><label class="upload-btn">＋ Tải lên<input type="file" multiple onchange="uploadDocument('${type}',${i},this)"></label></div></div>`).join('')}</div><div class="doc-progress"><span style="width:${Math.round(enough/items.length*100)}%"></span></div></div>`}).join('');
- return `<div class="panel flow-intro"><h3>Tài liệu</h3><p>Mỗi loại chi phí có danh mục hồ sơ riêng. Người dùng có thể theo dõi trạng thái đủ/thiếu và tải nhiều tệp cho từng tài liệu.</p></div>${sections}`
+function documentCaseComplete(c){
+ const items=Object.values(c.itemsByType||{}).flat();
+ return items.length>0&&items.every(i=>i.status==='Đã duyệt');
 }
-function reports(){const items=[['📊','Chi phí theo thời gian','Theo dõi biến động chi phí theo tháng, quý và năm'],['💳','Ngân sách và thực tế','So sánh ngân sách, đăng ký và chi phí thực tế'],['👥','Chi phí theo khách hàng','Phân tích chi phí và hiệu quả theo từng khách hàng'],['📦','Chi phí theo sản phẩm','Đánh giá ngân sách hỗ trợ theo nhóm sản phẩm'],['📍','Chi phí theo khu vực','So sánh mức chi phí giữa các khu vực kinh doanh'],['↗','Hiệu quả chương trình','Đo lường doanh số, chi phí và tỷ lệ hoàn thành']];return `<div class="report-grid">${items.map(x=>`<div class="panel report-card"><div class="report-icon">${x[0]}</div><h3>${x[1]}</h3><p>${x[2]}</p><button class="link-btn" onclick="showToast('Đã mở báo cáo mẫu')">Xem báo cáo →</button></div>`).join('')}</div>`}
+function expenseDocumentsComplete(expenseId){ensureDocumentCases();const cases=state.documentCases.filter(c=>(c.expenseIds||[]).includes(expenseId));return cases.length>0&&cases.some(documentCaseComplete)}
+function documentCaseProgress(c){const items=Object.values(c.itemsByType||{}).flat();const approved=items.filter(i=>i.status==='Đã duyệt').length;return {approved,total:items.length,percent:items.length?Math.round(approved/items.length*100):0}}
+function uploadCaseDocument(caseId,type,index,input){
+ ensureDocumentCases();const c=state.documentCases.find(x=>x.id===caseId);if(!c)return;const item=c.itemsByType[type][index];
+ const files=[...input.files].map(f=>({name:f.name,size:f.size,type:f.type,updated:new Date().toLocaleDateString('vi-VN')}));
+ item.files=[...(item.files||[]),...files];item.status=item.files.length?'Chờ kiểm tra':'Còn thiếu';item.returnNote='';persist();go('documents');showToast(`Đã tải lên ${files.length} tệp`)
+}
+function removeCaseFile(caseId,type,index,fileIndex){ensureDocumentCases();const c=state.documentCases.find(x=>x.id===caseId);if(!c)return;const item=c.itemsByType[type][index];item.files.splice(fileIndex,1);item.status=item.files.length?'Chờ kiểm tra':'Còn thiếu';persist();go('documents')}
+function approveCaseDocument(caseId,type,index){ensureDocumentCases();const c=state.documentCases.find(x=>x.id===caseId);if(!c)return;const item=c.itemsByType[type][index];if(!(item.files||[]).length){showToast('Chưa có tệp để phê duyệt');return}item.status='Đã duyệt';item.returnNote='';syncExpenseCompletion(c);persist();go('documents');showToast('Đã phê duyệt tài liệu')}
+function returnCaseDocument(caseId,type,index){ensureDocumentCases();const c=state.documentCases.find(x=>x.id===caseId);if(!c)return;const note=prompt('Nhập nội dung cần hoàn trả/bổ sung:');if(note===null)return;const item=c.itemsByType[type][index];item.status='Hoàn trả';item.returnNote=note||'Cần bổ sung lại tài liệu';syncExpenseCompletion(c);persist();go('documents');showToast('Đã hoàn trả tài liệu')}
+function syncExpenseCompletion(c){
+ const complete=documentCaseComplete(c);
+ (c.expenseIds||[]).forEach(id=>{const x=state.approvals.find(a=>a.id===id);if(!x)return;if(complete&&x.status==='Chờ bổ sung tài liệu'){x.status='Hoàn thành';x.completionReason='Đã hoàn tất và phê duyệt đầy đủ hồ sơ tài liệu'}else if(!complete&&x.status==='Hoàn thành'&&x.completionReason?.includes('tài liệu'))x.status='Chờ bổ sung tài liệu'})
+}
+function selectedExpenseIds(){return [...document.querySelectorAll('input[name="documentExpenseSelect"]:checked')].map(x=>x.value)}
+function createCombinedDocumentCase(){
+ const ids=selectedExpenseIds();if(!ids.length){showToast('Vui lòng chọn ít nhất một chi phí');return}
+ ensureDocumentCases();
+ // Loại các hồ sơ đơn lẻ chưa có tệp để tránh hiển thị trùng.
+ state.documentCases=state.documentCases.filter(c=>!((c.expenseIds||[]).length===1&&ids.includes(c.expenseIds[0])&&Object.values(c.itemsByType||{}).flat().every(i=>!(i.files||[]).length)));
+ const types=[...new Set(ids.map(id=>state.approvals.find(x=>x.id===id)?.type).filter(Boolean))];
+ state.documentCases.unshift({id:'TL-'+Date.now().toString().slice(-8),expenseIds:ids,createdAt:new Date().toLocaleDateString('vi-VN'),itemsByType:Object.fromEntries(types.map(t=>[t,defaultDocumentItems(t)]))});
+ persist();go('documents');showToast('Đã tạo bộ tài liệu cho các chi phí đã chọn')
+}
+function expenseSelector(){
+ const rows=expenseProcesses().filter(x=>['Đã phê duyệt','Đang thực hiện','Chờ bổ sung tài liệu','Hoàn thành'].includes(x.status));
+ return `<div class="panel document-selector"><div class="panel-head"><div><h3>Chọn chi phí liên kết</h3><p>Có thể chọn nhiều chi phí để quản lý trong cùng một bộ tài liệu.</p></div><button class="btn primary" onclick="createCombinedDocumentCase()">＋ Tạo bộ tài liệu</button></div><div class="expense-select-grid">${rows.map(x=>`<label class="expense-select-item"><input type="checkbox" name="documentExpenseSelect" value="${x.id}"><span><b>${x.name}</b><small>${x.id} · ${x.type} · ${money(x.amount)}</small></span>${badge(x.status)}</label>`).join('')}</div></div>`
+}
+function documents(){
+ ensureDocumentCases();
+ const sections=state.documentCases.map(c=>{
+  const linked=(c.expenseIds||[]).map(id=>state.approvals.find(x=>x.id===id)).filter(Boolean);const prog=documentCaseProgress(c);
+  const typeSections=Object.entries(c.itemsByType||{}).map(([type,items])=>`<div class="document-type-subsection"><div class="document-subhead"><div><span class="flow-badge">${type}</span><h4>Danh mục hồ sơ: ${type}</h4></div><b>${items.filter(i=>i.status==='Đã duyệt').length}/${items.length}</b></div><div class="document-detail-table"><div class="document-detail-row linked header"><span>Tên hồ sơ / tài liệu</span><span>Trạng thái</span><span>Tệp đã tải lên</span><span>Xử lý tài liệu</span></div>${items.map((item,i)=>`<div class="document-detail-row linked"><div><b>${i+1}. ${item.name}</b>${item.returnNote?`<small class="return-note">Hoàn trả: ${item.returnNote}</small>`:`<small>Bắt buộc đối với ${type}</small>`}</div><div>${badge(item.status)}</div><div class="uploaded-files">${(item.files||[]).length?(item.files||[]).map((f,fi)=>`<span>📎 ${f.name}<button onclick="removeCaseFile('${c.id}','${type}',${i},${fi})">×</button></span>`).join(''):'<em>Chưa có tệp</em>'}</div><div class="doc-actions"><label class="upload-btn">＋ Tải lên<input type="file" multiple onchange="uploadCaseDocument('${c.id}','${type}',${i},this)"></label>${item.status==='Chờ kiểm tra'?`<button class="action-btn warning" onclick="returnCaseDocument('${c.id}','${type}',${i})">Hoàn trả</button><button class="action-btn primary" onclick="approveCaseDocument('${c.id}','${type}',${i})">Phê duyệt</button>`:''}</div></div>`).join('')}</div></div>`).join('');
+  return `<div class="panel document-case-card"><div class="document-case-head"><div><span class="flow-badge">Bộ tài liệu ${c.id}</span><h3>${linked.map(x=>x.name).join(' · ')}</h3><p>Liên kết ${linked.length} chi phí: ${linked.map(x=>`${x.id} (${x.type})`).join(', ')}</p></div><div class="doc-count"><b>${prog.approved}/${prog.total}</b><small>${documentCaseComplete(c)?'Đã hoàn thành':'Hồ sơ đã duyệt'}</small></div></div>${typeSections}<div class="doc-progress"><span style="width:${prog.percent}%"></span></div><div class="document-case-footer"><span>Tiến độ ${prog.percent}%</span><strong>${documentCaseComplete(c)?'✓ Đủ hồ sơ – chi phí được hoàn thành':'Chi phí chỉ hoàn thành sau khi toàn bộ tài liệu được phê duyệt'}</strong></div></div>`
+ }).join('');
+ return `<div class="panel intro-panel"><h3>Tài liệu theo chi phí</h3><p>Mỗi bộ tài liệu liên kết trực tiếp với một hoặc nhiều chi phí. Tài liệu tải lên phải được kiểm tra và phê duyệt đầy đủ trước khi chi phí chuyển sang Hoàn thành.</p></div>${expenseSelector()}${sections||'<div class="panel empty-state">Chưa có bộ tài liệu. Hãy chọn chi phí phía trên để tạo.</div>'}`
+}
 function settings(){return `<div class="grid-2"><div class="panel"><h3>Người tham gia phê duyệt</h3><p class="report-grid-note">Mỗi quy trình đi lần lượt qua người tạo đơn, trưởng bộ phận và tài vụ.</p>${[['Người tạo đơn','Người khởi tạo từng đề nghị'],['Trưởng bộ phận','Nguyễn Văn Nam / cấu hình theo phòng ban'],['Tài vụ','Trần Thu Hà / cấu hình theo đơn vị']].map(x=>`<div class="activity"><div class="grow"><b>${x[0]}</b><small>${x[1]}</small></div><span>→</span></div>`).join('')}<button class="btn primary" style="margin-top:14px" onclick="showToast('Đã lưu cấu hình người phê duyệt')">Lưu thay đổi</button></div><div class="panel"><h3>Cấu hình hệ thống</h3>${['Mã tự động','Phân quyền người dùng','Thông báo tài liệu','Ngôn ngữ hệ thống','Sao lưu dữ liệu'].map(x=>`<div class="activity"><div class="grow"><b>${x}</b><small>Cấu hình mô phỏng trong phiên bản demo</small></div><span>→</span></div>`).join('')}</div></div>`}
 const renders={dashboard,master,expenses,registrations,documents,reports,settings};
-function go(id){current=id;pageTitle.textContent=navItems.find(x=>x[0]===id)[2];app.innerHTML=renders[id]();document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));sidebar.classList.remove('open');bindSearch()}
+const routePaths={dashboard:'/',master:'/master',expenses:'/revenue',registrations:'/cost',documents:'/file',reports:'/reports',settings:'/settings'};
+const pathRoutes={'/':'dashboard','/index.html':'dashboard','/master':'master','/data':'master','/revenue':'expenses','/sales':'expenses','/cost':'registrations','/expense':'registrations','/process':'registrations','/file':'documents','/files':'documents','/documents':'documents','/reports':'reports','/report':'reports','/settings':'settings'};
+function routeFromLocation(){return pathRoutes[location.pathname.replace(/\/$/,'')||'/']||'dashboard'}
+function go(id,updateUrl=true){
+  if(!renders[id])id='dashboard';
+  current=id;
+  const navItem=navItems.find(x=>x[0]===id);
+  pageTitle.textContent=navItem?navItem[2]:'Tổng quan';
+  app.innerHTML=renders[id]();
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
+  sidebar.classList.remove('open');
+  bindSearch();
+  if(updateUrl&&/^https?:$/.test(location.protocol)&&location.pathname!==routePaths[id])history.pushState({page:id},'',routePaths[id]);
+}
+window.addEventListener('popstate',()=>go(routeFromLocation(),false));
 function bindSearch(){const input=document.getElementById('globalSearch');input.value='';input.oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')}}
 nav.innerHTML=navItems.map(x=>`<button data-id="${x[0]}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('');
 const formSchemas={
@@ -482,10 +538,10 @@ function advanceProcess(id){const x=state.approvals.find(i=>i.id===id);if(!x)ret
  }
  else if(x.status==='Đã phê duyệt')x.status='Đang thực hiện';
  else if(x.status==='Đang thực hiện')x.status='Chờ bổ sung tài liệu';
- else if(x.status==='Chờ bổ sung tài liệu')x.status='Hoàn thành';
+ else if(x.status==='Chờ bổ sung tài liệu'){if(!expenseDocumentsComplete(x.id)){showToast('Chi phí chưa thể hoàn thành: hồ sơ tài liệu chưa được tải lên và phê duyệt đầy đủ');go('documents');return}x.status='Hoàn thành';x.completionReason='Đã hoàn tất và phê duyệt đầy đủ hồ sơ tài liệu';}
  persist();go('registrations');showToast(['Ngân sách','Điều chỉnh ngân sách'].includes(x.type)&&x.status==='Đang thực hiện'?'Ngân sách đã được phê duyệt và chuyển sang đang thực hiện':'Đã cập nhật trạng thái quy trình')}
 
 function incrementMaster(key){state.master[key]++;persist();go('master');showToast('Đã thêm dữ liệu mẫu')}
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='salescost-data.json';a.click();URL.revokeObjectURL(a.href);showToast('Đã xuất dữ liệu JSON')}
 function showToast(t){const toast=document.getElementById('toast');toast.textContent='✓ '+t;toast.style.display='block';setTimeout(()=>toast.style.display='none',2200)}
-document.getElementById('menuBtn').onclick=()=>sidebar.classList.toggle('open');document.getElementById('createBtn').onclick=()=>{if(current==='expenses')return salesReportMode==='targets'?openRevenueTargetModal():openSalesReportModal();if(current==='registrations')return registrationFlow==='budget'?openBudgetUnifiedModal():openRegistrationModal('');openModal()};document.getElementById('exportBtn').onclick=exportData;document.getElementById('closeModal').onclick=closeModal;document.getElementById('cancelModal').onclick=closeModal;document.getElementById('saveRecord').onclick=saveRecord;document.getElementById('modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};go('dashboard');
+document.getElementById('menuBtn').onclick=()=>sidebar.classList.toggle('open');document.getElementById('createBtn').onclick=()=>{if(current==='expenses')return salesReportMode==='targets'?openRevenueTargetModal():openSalesReportModal();if(current==='registrations')return registrationFlow==='budget'?openBudgetUnifiedModal():openRegistrationModal('');openModal()};document.getElementById('exportBtn').onclick=exportData;document.getElementById('closeModal').onclick=closeModal;document.getElementById('cancelModal').onclick=closeModal;document.getElementById('saveRecord').onclick=saveRecord;document.getElementById('modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};go(routeFromLocation(),false);
